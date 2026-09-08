@@ -6,6 +6,9 @@ import { ForgotPasswordPage } from "./features/auth/ForgotPasswordPage";
 import { ResetPasswordPage } from "./features/auth/ResetPasswordPage";
 import { OnboardingPage } from "./features/onboarding/OnboardingPage";
 import { DashboardPage } from "./features/dashboard/DashboardPage";
+import { CoursesPage } from "./features/learning/CoursesPage";
+import { CourseDetailPage } from "./features/learning/CourseDetailPage";
+import { LessonPage } from "./features/learning/LessonPage";
 import { GuestOnlyRoute, ProtectedRoute, RequireOnboarding } from "./app/protected-route";
 
 export function App() {
@@ -26,6 +29,9 @@ export function App() {
 
       <Route element={<RequireOnboarding />}>
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/courses" element={<CoursesPage />} />
+        <Route path="/courses/:slug" element={<CourseDetailPage />} />
+        <Route path="/lessons/:id" element={<LessonPage />} />
       </Route>
     </Routes>
   );

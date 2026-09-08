@@ -3,6 +3,7 @@ import { seedFeatureFlags } from "./feature-flags.js";
 import { seedUsers } from "./users.js";
 import { seedSkills } from "./skills.js";
 import { seedCourses } from "./courses.js";
+import { seedLessons } from "./lessons.js";
 
 /**
  * Punto de entrada del seed. Idempotente (sección 98): ejecutarlo varias veces
@@ -16,9 +17,10 @@ async function main() {
   await seedUsers();
   await seedSkills();
   await seedCourses();
+  await seedLessons();
 
-  // Fase 3+: seedLessons, seedExercises, seedCases, seedProjects,
-  // seedCompany, seedInterviews, seedAchievements...
+  // Fase 4+: seedExercises, seedCases, seedProjects, seedCompany,
+  // seedInterviews, seedAchievements...
 
   console.log("Seed completado.");
 }

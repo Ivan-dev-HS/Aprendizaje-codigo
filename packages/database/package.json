@@ -21,6 +21,7 @@
     "seed": "tsx prisma/seed/index.ts"
   },
   "dependencies": {
+    "@codeforge/types": "workspace:*",
     "@prisma/client": "^5.20.0",
     "bcryptjs": "^2.4.3"
   },

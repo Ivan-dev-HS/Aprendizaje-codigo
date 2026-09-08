@@ -78,7 +78,7 @@ actual:
 - [x] **Fase 0** — Especificación y plan de implementación.
 - [x] **Fase 1** — Infraestructura: monorepo, tooling, Docker Compose, CI, `/health`.
 - [x] **Fase 2** — Autenticación y onboarding.
-- [ ] Fase 3 — Motor educativo y contenido insignia.
+- [x] **Fase 3** — Motor educativo y contenido insignia (5 cursos, 11 módulos, 29 lecciones reales).
 - [ ] Fase 4 — Motor de ejercicios.
 - [ ] Fase 5 — Code labs.
 - [ ] Fase 6 — Proyectos, portfolio y CV.

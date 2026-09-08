@@ -1,7 +1,9 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { Button, Card } from "@codeforge/ui";
 import { useAuth } from "../auth/auth-context";
-import { useTheme } from "../../app/theme-context";
+import { NavBar } from "../../app/NavBar";
+import { learningApi } from "../learning/learning.api";
 
 const GOAL_LABELS: Record<string, string> = {
   FROM_SCRATCH: "Aprender desde cero",
@@ -13,63 +15,75 @@ const GOAL_LABELS: Record<string, string> = {
 };
 
 export function DashboardPage() {
-  const { user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
-  const navigate = useNavigate();
+  const { user } = useAuth();
+  const pathQuery = useQuery({
+    queryKey: ["learning-path"],
+    queryFn: learningApi.getLearningPath,
+  });
 
   if (!user) return null;
 
-  async function handleLogout() {
-    await logout();
-    navigate("/login", { replace: true });
-  }
+  const nextCourse = pathQuery.data?.items.find(
+    (item) => item.isUnlocked && !item.isCompleted && item.lessonCount > 0,
+  );
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10">
-      <header className="mb-8 flex items-center justify-between">
-        <div>
+    <div className="min-h-screen">
+      <NavBar />
+      <main className="mx-auto max-w-4xl px-4 py-10">
+        <header className="mb-8">
           <p className="text-sm text-slate-500 dark:text-slate-400">Hola de nuevo,</p>
           <h1 className="text-2xl font-bold">{user.profile.displayName}</h1>
+        </header>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Card>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Nivel</p>
+            <p className="text-3xl font-bold">{user.profile.level}</p>
+          </Card>
+          <Card>
+            <p className="text-sm text-slate-500 dark:text-slate-400">XP total</p>
+            <p className="text-3xl font-bold">{user.profile.totalXp}</p>
+          </Card>
+          <Card>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Racha</p>
+            <p className="text-3xl font-bold">{user.profile.streakDays} días</p>
+          </Card>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" onClick={toggleTheme}>
-            {theme === "light" ? "Modo oscuro" : "Modo claro"}
-          </Button>
-          <Button variant="secondary" onClick={handleLogout}>
-            Cerrar sesión
-          </Button>
-        </div>
-      </header>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Nivel</p>
-          <p className="text-3xl font-bold">{user.profile.level}</p>
+        <Card className="mt-6">
+          <p className="text-sm text-slate-500 dark:text-slate-400">Tu objetivo</p>
+          <p className="text-lg font-medium">
+            {GOAL_LABELS[user.profile.goal] ?? user.profile.goal}
+          </p>
         </Card>
-        <Card>
-          <p className="text-sm text-slate-500 dark:text-slate-400">XP total</p>
-          <p className="text-3xl font-bold">{user.profile.totalXp}</p>
-        </Card>
-        <Card>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Racha</p>
-          <p className="text-3xl font-bold">{user.profile.streakDays} días</p>
-        </Card>
-      </div>
 
-      <Card className="mt-6">
-        <p className="text-sm text-slate-500 dark:text-slate-400">Tu objetivo</p>
-        <p className="text-lg font-medium">
-          {GOAL_LABELS[user.profile.goal] ?? user.profile.goal}
-        </p>
-      </Card>
+        <Card className="mt-6">
+          <p className="mb-2 text-sm text-slate-500 dark:text-slate-400">
+            Continuar aprendiendo
+          </p>
+          {nextCourse ? (
+            <>
+              <p className="mb-3 text-lg font-medium">{nextCourse.courseTitle}</p>
+              <Link to={`/courses/${nextCourse.courseSlug}`}>
+                <Button>Continuar →</Button>
+              </Link>
+            </>
+          ) : (
+            <Link to="/courses">
+              <Button variant="secondary">Ver mi roadmap</Button>
+            </Link>
+          )}
+        </Card>
 
-      <Card className="mt-6">
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-          El resto del dashboard (progreso, cursos, laboratorios, proyectos, empresa,
-          entrevistas y logros) se construye en las siguientes fases — ver{" "}
-          <code>IMPLEMENTATION_PLAN.md</code>.
-        </p>
-      </Card>
-    </main>
+        <Card className="mt-6">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+            Laboratorios de código, proyectos, simulación de empresa, entrevistas, logros
+            y búsqueda global se construyen en las siguientes fases — ver{" "}
+            <code>IMPLEMENTATION_PLAN.md</code>.
+          </p>
+        </Card>
+      </main>
+    </div>
   );
 }
