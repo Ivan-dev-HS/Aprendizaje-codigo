@@ -1,0 +1,942 @@
+// CodeForge — modelo de datos.
+// Fuente única de verdad del esquema. Ver docs/DATABASE.md para el detalle narrativo
+// y IMPLEMENTATION_PLAN.md §4 para el resumen por dominio.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =========================================================================
+// IDENTIDAD
+// =========================================================================
+
+/// Roles actuales. La arquitectura queda preparada para roles futuros
+/// (INSTRUCTOR, MENTOR, COMPANY) sin cambiar el modelo: bastaría con
+/// extender este enum y los middlewares de autorización en apps/api.
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Goal {
+  FROM_SCRATCH
+  FRONTEND
+  BACKEND
+  FULL_STACK
+  IT_SUPPORT
+  INTERVIEW_PREP
+}
+
+enum ExperienceLevel {
+  NONE
+  BASIC
+  INTERMEDIATE
+  ADVANCED
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  username     String    @unique
+  passwordHash String
+  role         Role      @default(USER)
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  profile             Profile?
+  sessions             Session[]
+  passwordResets       PasswordResetToken[]
+  userSkills           UserSkill[]
+  lessonProgress       LessonProgress[]
+  exerciseAttempts     ExerciseAttempt[]
+  caseAttempts         CaseAttempt[]
+  learningPath         LearningPath?
+  userProjects         UserProject[]
+  ticketsAssigned      Ticket[]              @relation("TicketAssignee")
+  ticketsReported      Ticket[]              @relation("TicketReporter")
+  ticketComments       TicketComment[]
+  pullRequests         PullRequest[]
+  codeReviews          CodeReview[]
+  standupEntries       StandupEntry[]
+  interviewAttempts    InterviewAttempt[]
+  userAchievements     UserAchievement[]
+  userMissions         UserMission[]
+  xpEvents             XpEvent[]
+  notifications        Notification[]
+  progressEvents       ProgressEvent[]
+  auditLogs            AuditLog[]
+  portfolio            Portfolio?
+  resume               Resume?
+  playgroundSnapshots  PlaygroundSnapshot[]
+  terminalLabState     TerminalLabState?
+  gitLabState          GitLabState?
+
+  @@index([role])
+}
+
+model Profile {
+  id                    String           @id @default(cuid())
+  userId                String           @unique
+  user                  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName           String
+  avatarUrl             String?
+  bio                   String?
+  goal                  Goal             @default(FROM_SCRATCH)
+  experienceLevel       ExperienceLevel  @default(NONE)
+  level                 Int              @default(1)
+  totalXp               Int              @default(0)
+  streakDays            Int              @default(0)
+  lastActivityAt        DateTime?
+  onboardingCompletedAt DateTime?
+  readinessScore        Int?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+}
+
+model Session {
+  id               String    @id @default(cuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokenHash String    @unique
+  userAgent        String?
+  ipAddress        String?
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  createdAt        DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+// =========================================================================
+// APRENDIZAJE
+// =========================================================================
+
+model Course {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  title          String
+  description    String
+  order          Int
+  icon           String?
+  estimatedHours Int?
+  isPublished    Boolean  @default(true)
+  contentVersion Int      @default(1)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  modules           Module[]
+  learningPathItems LearningPathItem[]
+
+  @@index([order])
+}
+
+model Module {
+  id               String   @id @default(cuid())
+  courseId         String
+  course           Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  slug             String
+  title            String
+  description      String
+  order            Int
+  requiresModuleId String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  lessons Lesson[]
+
+  @@unique([courseId, slug])
+  @@index([courseId])
+}
+
+model Lesson {
+  id               String   @id @default(cuid())
+  moduleId         String
+  module           Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  skillId          String?
+  skill            Skill?   @relation(fields: [skillId], references: [id])
+  slug             String
+  title            String
+  summary          String
+  /// Bloques estructurados: theory, technicalExplanation, example, commonMistake,
+  /// guidedPractice, challenge, realApplication (sección 14).
+  content          Json
+  order            Int
+  estimatedMinutes Int      @default(10)
+  contentVersion   Int      @default(1)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  exercises      Exercise[]
+  lessonProgress LessonProgress[]
+
+  @@unique([moduleId, slug])
+  @@index([moduleId])
+  @@index([skillId])
+}
+
+model LessonProgress {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonId    String
+  lesson      Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  @@unique([userId, lessonId])
+  @@index([userId])
+}
+
+model Skill {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String
+  category    String
+  createdAt   DateTime @default(now())
+
+  lessons            Lesson[]
+  exercises          Exercise[]
+  userSkills         UserSkill[]
+  cases              Case[]
+  interviewQuestions InterviewQuestion[]
+}
+
+model UserSkill {
+  id                  String    @id @default(cuid())
+  userId              String
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skillId             String
+  skill               Skill     @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  masteryScore        Int       @default(0)
+  consecutiveFailures Int       @default(0)
+  isWeak              Boolean   @default(false)
+  lastPracticedAt     DateTime?
+  updatedAt           DateTime  @updatedAt
+
+  @@unique([userId, skillId])
+  @@index([userId])
+  @@index([skillId])
+}
+
+model LearningPath {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goal      Goal
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items LearningPathItem[]
+}
+
+model LearningPathItem {
+  id             String       @id @default(cuid())
+  learningPathId String
+  learningPath   LearningPath @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+  courseId       String
+  course         Course       @relation(fields: [courseId], references: [id])
+  order          Int
+  isRequired     Boolean      @default(true)
+  unlockedAt     DateTime?
+  completedAt    DateTime?
+
+  @@unique([learningPathId, courseId])
+  @@index([learningPathId])
+}
+
+// =========================================================================
+// EJERCICIOS
+// =========================================================================
+
+enum ExerciseType {
+  MCQ
+  TRUE_FALSE
+  CODE_COMPLETION
+  CODE_WRITING
+  DEBUGGING
+  OUTPUT_PREDICTION
+  ORDERING
+  MATCHING
+  SQL
+  TERMINAL
+  REAL_CASE
+  PROJECT_TASK
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+model Exercise {
+  id               String       @id @default(cuid())
+  lessonId         String?
+  lesson           Lesson?      @relation(fields: [lessonId], references: [id])
+  skillId          String
+  skill            Skill        @relation(fields: [skillId], references: [id])
+  slug             String       @unique
+  title            String
+  description      String
+  type             ExerciseType
+  difficulty       Difficulty
+  points           Int
+  estimatedMinutes Int
+  /// Payload específico del tipo: opciones (MCQ), código inicial (CODE_*),
+  /// filas a ordenar (ORDERING), pares (MATCHING), etc.
+  prompt           Json
+  hints            Json
+  solution         Json
+  explanation      String
+  tests            Json?
+  contentVersion   Int          @default(1)
+  isPublished      Boolean      @default(true)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  attempts ExerciseAttempt[]
+
+  @@index([skillId])
+  @@index([type])
+  @@index([lessonId])
+}
+
+model ExerciseAttempt {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exerciseId       String
+  exercise         Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  answer           Json
+  isCorrect        Boolean
+  score            Int      @default(0)
+  xpAwarded        Int      @default(0)
+  hintsUsed        Int      @default(0)
+  timeSpentSeconds Int      @default(0)
+  attemptNumber    Int
+  createdAt        DateTime @default(now())
+
+  @@index([userId])
+  @@index([exerciseId])
+  @@index([userId, exerciseId])
+}
+
+// =========================================================================
+// LABS
+// =========================================================================
+
+model PlaygroundSnapshot {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  html      String
+  css       String
+  js        String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model TerminalLabState {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  filesystem Json
+  history    Json
+  updatedAt  DateTime @updatedAt
+}
+
+model GitLabState {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  repoState Json
+  updatedAt DateTime @updatedAt
+}
+
+model SqlLabDataset {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String
+  schemaSql   String
+  seedSql     String
+  createdAt   DateTime @default(now())
+}
+
+// =========================================================================
+// CASOS REALES (Debugging / IT Support / Networking / Producción)
+// =========================================================================
+
+enum CaseKind {
+  DEBUGGING
+  IT_SUPPORT
+  NETWORKING
+  PRODUCTION_INCIDENT
+}
+
+enum CaseDomain {
+  HTML
+  CSS
+  JAVASCRIPT
+  REACT
+  NODE
+  SQL
+  API
+  GIT
+  LINUX
+  IT_HARDWARE
+  IT_WINDOWS
+  IT_LINUX
+  IT_NETWORKING
+  IT_SOFTWARE
+  IT_SECURITY
+  IT_PRINTERS
+  IT_ACCOUNTS
+  IT_PERFORMANCE
+  NETWORKING
+  PRODUCTION
+}
+
+enum IncidentSeverity {
+  P0
+  P1
+  P2
+  P3
+}
+
+model Case {
+  id          String            @id @default(cuid())
+  slug        String            @unique
+  kind        CaseKind
+  domain      CaseDomain
+  severity    IncidentSeverity?
+  skillId     String?
+  skill       Skill?            @relation(fields: [skillId], references: [id])
+  title       String
+  symptoms    String
+  environment String
+  code        String?
+  logs        String?
+  expected    String
+  actual      String
+  hints       Json
+  solution    String
+  explanation String
+  points      Int
+  difficulty  Difficulty
+  isPublished Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  attempts CaseAttempt[]
+
+  @@index([kind])
+  @@index([domain])
+}
+
+model CaseAttempt {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  caseId     String
+  case       Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  diagnosis  String
+  isCorrect  Boolean
+  hintsUsed  Int      @default(0)
+  xpAwarded  Int      @default(0)
+  /// Para PRODUCTION_INCIDENT: { whatHappened, rootCause, impact, timeline, fix, prevention }
+  postmortem Json?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([caseId])
+}
+
+// =========================================================================
+// PROYECTOS
+// =========================================================================
+
+enum ProjectLevel {
+  L1_PORTFOLIO
+  L2_LANDING
+  L3_TODO
+  L4_DASHBOARD
+  L5_API_APP
+  L6_ECOMMERCE
+  L7_FULL_STACK
+  L8_SAAS
+}
+
+model Project {
+  id                 String       @id @default(cuid())
+  slug               String       @unique
+  title              String
+  level              ProjectLevel
+  brief              String
+  requirements       Json
+  userStories        Json
+  acceptanceCriteria Json
+  bonusIdeas         Json?
+  estimatedHours     Int
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  tasks        ProjectTask[]
+  userProjects UserProject[]
+}
+
+model ProjectTask {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  order       Int
+
+  progress ProjectProgress[]
+
+  @@index([projectId])
+}
+
+model UserProject {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId    String
+  project      Project   @relation(fields: [projectId], references: [id])
+  status       String    @default("IN_PROGRESS")
+  githubUrl    String?
+  demoUrl      String?
+  readme       String?
+  screenshots  Json?
+  technologies Json?
+  startedAt    DateTime  @default(now())
+  completedAt  DateTime?
+
+  progress ProjectProgress[]
+
+  @@unique([userId, projectId])
+  @@index([userId])
+  @@index([projectId])
+}
+
+model ProjectProgress {
+  id            String      @id @default(cuid())
+  userProjectId String
+  userProject   UserProject @relation(fields: [userProjectId], references: [id], onDelete: Cascade)
+  taskId        String
+  task          ProjectTask @relation(fields: [taskId], references: [id])
+  completedAt   DateTime?
+
+  @@unique([userProjectId, taskId])
+}
+
+// =========================================================================
+// SIMULADOR DE EMPRESA — NEXORA TECH
+// =========================================================================
+
+enum TicketStatus {
+  BACKLOG
+  TODO
+  IN_PROGRESS
+  BLOCKED
+  CODE_REVIEW
+  QA
+  DONE
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TicketType {
+  BUG
+  FEATURE
+  CHORE
+  INCIDENT
+}
+
+model Sprint {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  goal      String
+  startDate DateTime
+  endDate   DateTime
+  createdAt DateTime @default(now())
+
+  tickets Ticket[]
+}
+
+model Ticket {
+  id                 String         @id @default(cuid())
+  code               String         @unique
+  sprintId           String?
+  sprint             Sprint?        @relation(fields: [sprintId], references: [id])
+  title              String
+  description        String
+  priority           TicketPriority
+  type               TicketType
+  status             TicketStatus   @default(BACKLOG)
+  acceptanceCriteria Json
+  reporterId         String
+  reporter           User           @relation("TicketReporter", fields: [reporterId], references: [id])
+  assigneeId         String?
+  assignee           User?          @relation("TicketAssignee", fields: [assigneeId], references: [id])
+  xpAwarded          Int            @default(0)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  comments     TicketComment[]
+  pullRequests PullRequest[]
+
+  @@index([status])
+  @@index([sprintId])
+  @@index([assigneeId])
+}
+
+model TicketComment {
+  id        String   @id @default(cuid())
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  body      String
+  createdAt DateTime @default(now())
+
+  @@index([ticketId])
+}
+
+model PullRequest {
+  id          String   @id @default(cuid())
+  ticketId    String
+  ticket      Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  title       String
+  description String
+  diff        String
+  status      String   @default("OPEN")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  reviews CodeReview[]
+
+  @@index([ticketId])
+  @@index([authorId])
+}
+
+model CodeReview {
+  id                    String      @id @default(cuid())
+  pullRequestId         String
+  pullRequest           PullRequest @relation(fields: [pullRequestId], references: [id], onDelete: Cascade)
+  reviewerId            String
+  reviewer              User        @relation(fields: [reviewerId], references: [id])
+  comments              Json
+  verdict               String
+  expertComparisonScore Int?
+  createdAt             DateTime    @default(now())
+
+  @@index([pullRequestId])
+}
+
+model StandupEntry {
+  id                 String   @id @default(cuid())
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date               DateTime @default(now())
+  yesterday          String
+  today              String
+  blockers           String?
+  communicationScore Int?
+
+  @@index([userId])
+}
+
+// =========================================================================
+// ENTREVISTAS
+// =========================================================================
+
+enum InterviewCategory {
+  TECHNICAL
+  BEHAVIORAL
+  FRONTEND
+  BACKEND
+  FULL_STACK
+  IT_SUPPORT
+}
+
+model InterviewQuestion {
+  id             String            @id @default(cuid())
+  category       InterviewCategory
+  skillId        String?
+  skill          Skill?            @relation(fields: [skillId], references: [id])
+  difficulty     Difficulty
+  prompt         String
+  expectedAnswer String
+  concepts       Json
+  commonMistakes Json
+  createdAt      DateTime          @default(now())
+
+  answers            InterviewAnswer[]
+  templateQuestions  InterviewTemplateQuestion[]
+
+  @@index([category])
+}
+
+model Interview {
+  id              String            @id @default(cuid())
+  slug            String            @unique
+  title           String
+  category        InterviewCategory
+  durationMinutes Int               @default(30)
+  createdAt       DateTime          @default(now())
+
+  templateQuestions InterviewTemplateQuestion[]
+  attempts          InterviewAttempt[]
+}
+
+model InterviewTemplateQuestion {
+  id          String            @id @default(cuid())
+  interviewId String
+  interview   Interview         @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  questionId  String
+  question    InterviewQuestion @relation(fields: [questionId], references: [id])
+  order       Int
+
+  @@unique([interviewId, questionId])
+}
+
+model InterviewAttempt {
+  id                  String    @id @default(cuid())
+  userId              String
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  interviewId         String
+  interview           Interview @relation(fields: [interviewId], references: [id])
+  startedAt           DateTime  @default(now())
+  finishedAt          DateTime?
+  technicalScore      Int?
+  problemSolvingScore Int?
+  communicationScore  Int?
+  confidenceScore     Int?
+  overallScore        Int?
+  xpAwarded           Int       @default(0)
+
+  answers InterviewAnswer[]
+
+  @@index([userId])
+}
+
+model InterviewAnswer {
+  id               String            @id @default(cuid())
+  attemptId        String
+  attempt          InterviewAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId       String
+  question         InterviewQuestion @relation(fields: [questionId], references: [id])
+  answerText       String
+  timeSpentSeconds Int               @default(0)
+  score            Int?
+
+  @@index([attemptId])
+}
+
+// =========================================================================
+// GAMIFICACIÓN
+// =========================================================================
+
+model Achievement {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String
+  icon        String
+  xpReward    Int      @default(0)
+  criteria    Json
+  createdAt   DateTime @default(now())
+
+  userAchievements UserAchievement[]
+}
+
+model UserAchievement {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievementId String
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+  unlockedAt    DateTime    @default(now())
+
+  @@unique([userId, achievementId])
+  @@index([userId])
+}
+
+enum MissionPeriod {
+  DAILY
+  WEEKLY
+}
+
+model Mission {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  title       String
+  description String
+  period      MissionPeriod
+  xpReward    Int
+  criteria    Json
+  createdAt   DateTime      @default(now())
+
+  userMissions UserMission[]
+}
+
+model UserMission {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  missionId   String
+  mission     Mission   @relation(fields: [missionId], references: [id])
+  periodKey   String
+  progress    Int       @default(0)
+  target      Int
+  completedAt DateTime?
+
+  @@unique([userId, missionId, periodKey])
+  @@index([userId])
+}
+
+enum XpSource {
+  LESSON
+  EXERCISE
+  CASE
+  PROJECT
+  TICKET
+  INTERVIEW
+  ACHIEVEMENT
+  MISSION
+}
+
+model XpEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount    Int
+  source    XpSource
+  /// id de la entidad que originó el XP (leccion, intento, ticket...). Se usa
+  /// como llave de idempotencia para evitar explotar XP repitiendo la misma acción.
+  sourceId  String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([userId, source, sourceId])
+}
+
+// =========================================================================
+// PORTFOLIO / CV
+// =========================================================================
+
+model Portfolio {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isPublic  Boolean  @default(false)
+  headline  String?
+  theme     String   @default("default")
+  updatedAt DateTime @updatedAt
+}
+
+model Resume {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  summary    String?
+  experience Json?
+  education  Json?
+  links      Json?
+  updatedAt  DateTime @updatedAt
+}
+
+// =========================================================================
+// PLATAFORMA
+// =========================================================================
+
+enum NotificationType {
+  ACHIEVEMENT
+  COURSE
+  TICKET
+  REVIEW
+  SYSTEM
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  @@index([userId])
+  @@index([userId, readAt])
+}
+
+model ProgressEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  payload   Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([name])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String
+  actor      User     @relation(fields: [actorId], references: [id])
+  action     String
+  entityType String
+  entityId   String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId])
+  @@index([entityType, entityId])
+}
+
+model FeatureFlag {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  isEnabled   Boolean  @default(false)
+  description String?
+  updatedAt   DateTime @updatedAt
+}

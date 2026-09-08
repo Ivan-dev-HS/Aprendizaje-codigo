@@ -1,0 +1,111 @@
+name: codeforge
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-codeforge}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-codeforge_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-codeforge}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - codeforge_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-codeforge} -d ${POSTGRES_DB:-codeforge}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  exec-service:
+    build:
+      context: .
+      dockerfile: apps/exec-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      EXEC_SERVICE_PORT: 4100
+      EXEC_SERVICE_INTERNAL_TOKEN: ${EXEC_SERVICE_INTERNAL_TOKEN:-change_me_dev_only_internal_token}
+      SANDBOX_DATABASE_URL: postgresql://${SANDBOX_DB_USER:-codeforge_sandbox}:${SANDBOX_DB_PASSWORD:-codeforge_sandbox_password}@postgres:5432/${POSTGRES_DB:-codeforge}?schema=sandbox
+      EXEC_JS_TIMEOUT_MS: ${EXEC_JS_TIMEOUT_MS:-2000}
+      EXEC_JS_MEMORY_MB: ${EXEC_JS_MEMORY_MB:-64}
+      EXEC_SQL_TIMEOUT_MS: ${EXEC_SQL_TIMEOUT_MS:-2000}
+      EXEC_MAX_OUTPUT_BYTES: ${EXEC_MAX_OUTPUT_BYTES:-65536}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # No se publica ningún puerto al host: solo es alcanzable desde la red interna de docker-compose (por `api`).
+    expose:
+      - "4100"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:4100/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      API_PORT: 4000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-codeforge}:${POSTGRES_PASSWORD:-codeforge_dev_password}@postgres:5432/${POSTGRES_DB:-codeforge}?schema=public
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-change_me_dev_only_access_secret}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change_me_dev_only_refresh_secret}
+      JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-15m}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN:-localhost}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+      EXEC_SERVICE_URL: http://exec-service:4100
+      EXEC_SERVICE_INTERNAL_TOKEN: ${EXEC_SERVICE_INTERNAL_TOKEN:-change_me_dev_only_internal_token}
+      RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-900000}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-300}
+      AUTH_RATE_LIMIT_WINDOW_MS: ${AUTH_RATE_LIMIT_WINDOW_MS:-900000}
+      AUTH_RATE_LIMIT_MAX: ${AUTH_RATE_LIMIT_MAX:-20}
+    ports:
+      - "${API_PORT:-4000}:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      exec-service:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:4000/api/v1/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:4000/api/v1}
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-5173}:80"
+    depends_on:
+      - api
+
+volumes:
+  codeforge_postgres_data:
