@@ -1,6 +1,9 @@
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { Button } from "@codeforge/ui";
 import { apiClient } from "../lib/api-client";
 import { useTheme } from "../app/theme-context";
+import { useAuth } from "../features/auth/auth-context";
 
 interface HealthResponse {
   status: string;
@@ -9,6 +12,7 @@ interface HealthResponse {
 
 export function HomePage() {
   const { theme, toggleTheme } = useTheme();
+  const { status } = useAuth();
   const health = useQuery({
     queryKey: ["health"],
     queryFn: async () => (await apiClient.get<HealthResponse>("/health")).data,
@@ -28,13 +32,27 @@ export function HomePage() {
         entrevistas — todo en una sola plataforma.
       </p>
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        {status === "authenticated" ? (
+          <Link to="/dashboard">
+            <Button>Ir a mi dashboard</Button>
+          </Link>
+        ) : (
+          <>
+            <Link to="/register">
+              <Button>Empezar gratis</Button>
+            </Link>
+            <Link to="/login">
+              <Button variant="secondary">Iniciar sesión</Button>
+            </Link>
+          </>
+        )}
         <button
           type="button"
           onClick={toggleTheme}
           className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
         >
-          Cambiar a modo {theme === "light" ? "oscuro" : "claro"}
+          Modo {theme === "light" ? "oscuro" : "claro"}
         </button>
       </div>
 

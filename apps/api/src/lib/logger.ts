@@ -1,12 +1,12 @@
 import pino from "pino";
-import { env, isProduction } from "../config/env.js";
+import { env, isProduction, isTest } from "../config/env.js";
 
 /**
  * Logger estructurado. Nunca debe recibir passwords, tokens ni secretos:
  * los serializadores redactan las claves más habituales por defecto.
  */
 export const logger = pino({
-  level: env.LOG_LEVEL,
+  level: isTest ? "silent" : env.LOG_LEVEL,
   redact: {
     paths: [
       "req.headers.authorization",

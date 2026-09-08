@@ -105,8 +105,8 @@ Ver decisión en tabla §2. `apps/exec-service` no se expone a internet (solo re
 Cada fase termina con: lint, typecheck, tests, build, verificación manual de la funcionalidad, actualización de documentación, commit.
 
 - **Fase 0** — Este documento + `SPEC.md`. ✅
-- **Fase 1** — Infraestructura: monorepo, tooling (ESLint/Prettier/Husky/lint-staged), Docker Compose (web/api/exec-service/postgres con healthchecks), Prisma init + migración inicial, esqueleto de apps, CI, `/health`.
-- **Fase 2** — Auth: registro, login, logout, refresh, perfil, roles, rutas protegidas (frontend + backend), onboarding.
+- **Fase 1** ✅ — Infraestructura: monorepo, tooling (ESLint/Prettier/Husky/lint-staged), Docker Compose (web/api/exec-service/postgres con healthchecks), Prisma init + migración inicial (incluye rol `codeforge_sandbox`), esqueleto de apps, CI, `/health`. Verificado end-to-end (migraciones, seed idempotente, los tres servicios arrancan y hablan entre sí).
+- **Fase 2** ✅ — Auth: registro, login, logout, refresh (rotación de refresh token), recuperación de contraseña (`EmailProvider` mock que loguea el envío), perfil (`/users/me`), roles, rutas protegidas frontend (`ProtectedRoute`/`RequireOnboarding`/`RequireAdmin`) + backend (`requireAuth`/`requireRole`), onboarding completo (experiencia → objetivo → evaluación inicial de 8 preguntas reales → generación de `LearningPath` a partir de reglas por objetivo). Seed de 18 cursos, 24 skills y usuarios demo/admin. 17 tests de integración + 6 unit + E2E (Playwright: registro→onboarding→dashboard→logout→login, y bloqueo de ruta protegida) en verde.
 - **Fase 3** — Motor educativo: Course/Module/Lesson/Skill/LearningPath + contenido real (cursos insignia).
 - **Fase 4** — Ejercicios: motor de intentos, XP, anti-explotación, adaptativo (skill weak), seeds de ejercicios.
 - **Fase 5** — Code labs: Monaco, HTML/CSS/JS playground, exec-service, SQL Lab, Terminal Lab, Git Lab.

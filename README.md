@@ -36,8 +36,13 @@ Ver `docs/DEPLOYMENT.md` para más detalle.
 
 ## Credenciales de demostración
 
-Se documentan aquí en cuanto el seed de autenticación (Fase 2) esté implementado.
-Nunca son credenciales reales; solo válidas en una instancia local de desarrollo.
+Solo válidas en una instancia local de desarrollo, nunca credenciales reales. Se
+crean con `pnpm db:seed` (ver `packages/database/prisma/seed/users.ts`):
+
+| Rol   | Email               | Usuario | Contraseña     |
+| ----- | ------------------- | ------- | -------------- |
+| USER  | demo@example.local  | demo    | CodeForge2026! |
+| ADMIN | admin@example.local | admin   | CodeForge2026! |
 
 ## Estructura del proyecto
 
@@ -72,7 +77,7 @@ actual:
 
 - [x] **Fase 0** — Especificación y plan de implementación.
 - [x] **Fase 1** — Infraestructura: monorepo, tooling, Docker Compose, CI, `/health`.
-- [ ] Fase 2 — Autenticación y onboarding.
+- [x] **Fase 2** — Autenticación y onboarding.
 - [ ] Fase 3 — Motor educativo y contenido insignia.
 - [ ] Fase 4 — Motor de ejercicios.
 - [ ] Fase 5 — Code labs.

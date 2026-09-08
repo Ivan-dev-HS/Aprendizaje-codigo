@@ -1,5 +1,8 @@
 import { prisma } from "../../src/client.js";
 import { seedFeatureFlags } from "./feature-flags.js";
+import { seedUsers } from "./users.js";
+import { seedSkills } from "./skills.js";
+import { seedCourses } from "./courses.js";
 
 /**
  * Punto de entrada del seed. Idempotente (sección 98): ejecutarlo varias veces
@@ -10,8 +13,11 @@ async function main() {
   console.log("Sembrando base de datos de CodeForge…");
 
   await seedFeatureFlags();
+  await seedUsers();
+  await seedSkills();
+  await seedCourses();
 
-  // Fase 2+: seedUsers, seedCourses, seedExercises, seedCases, seedProjects,
+  // Fase 3+: seedLessons, seedExercises, seedCases, seedProjects,
   // seedCompany, seedInterviews, seedAchievements...
 
   console.log("Seed completado.");

@@ -28,6 +28,7 @@ Especificación OpenAPI (se irá completando por fase): `apps/api/openapi.yaml`.
 | POST      | `/auth/password-reset/confirm`                         | Confirma nueva contraseña con token                   | 2    |
 | GET       | `/users/me`                                            | Perfil del usuario autenticado                        | 2    |
 | PATCH     | `/users/me`                                            | Actualiza perfil                                      | 2    |
+| GET       | `/onboarding/quiz`                                     | Evaluación inicial (sin respuestas correctas)         | 2    |
 | POST      | `/onboarding`                                          | Completa el asistente de onboarding                   | 2    |
 | GET       | `/courses`, `/courses/:slug`                           | Catálogo de cursos                                    | 3    |
 | GET       | `/lessons/:id`                                         | Detalle de lección                                    | 3    |
