@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { AuthUser } from "@codeforge/types";
 import { setAccessToken, setOnAuthFailure } from "../../lib/token-store";
 import { authApi } from "./auth.api";
@@ -7,19 +7,25 @@ import { AuthContext, type AuthContextValue, type AuthStatus } from "./auth-cont
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>("loading");
   const [user, setUserState] = useState<AuthUser | null>(null);
+  // Evita que React 18 StrictMode (que en desarrollo invoca los efectos dos
+  // veces) dispare dos POST /auth/refresh en paralelo: al ser el refresh
+  // token de un solo uso (se rota en cada canje), la segunda petición
+  // consumiría un token ya invalidado por la primera y forzaría un
+  // logout falso. AuthProvider vive una sola vez para toda la app, así
+  // que un guard por instancia (no un cleanup) es la solución correcta.
+  const hasBootstrapped = useRef(false);
 
   useEffect(() => {
-    let cancelled = false;
+    if (hasBootstrapped.current) return;
+    hasBootstrapped.current = true;
 
     async function bootstrap() {
       try {
         const session = await authApi.refresh();
-        if (cancelled) return;
         setAccessToken(session.accessToken);
         setUserState(session.user);
         setStatus("authenticated");
       } catch {
-        if (cancelled) return;
         setAccessToken(null);
         setUserState(null);
         setStatus("anonymous");
@@ -27,9 +33,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     void bootstrap();
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   useEffect(() => {

@@ -9,6 +9,8 @@ import { DashboardPage } from "./features/dashboard/DashboardPage";
 import { CoursesPage } from "./features/learning/CoursesPage";
 import { CourseDetailPage } from "./features/learning/CourseDetailPage";
 import { LessonPage } from "./features/learning/LessonPage";
+import { ExercisesPage } from "./features/exercises/ExercisesPage";
+import { ExerciseDetailPage } from "./features/exercises/ExerciseDetailPage";
 import { GuestOnlyRoute, ProtectedRoute, RequireOnboarding } from "./app/protected-route";
 
 export function App() {
@@ -32,6 +34,8 @@ export function App() {
         <Route path="/courses" element={<CoursesPage />} />
         <Route path="/courses/:slug" element={<CourseDetailPage />} />
         <Route path="/lessons/:id" element={<LessonPage />} />
+        <Route path="/exercises" element={<ExercisesPage />} />
+        <Route path="/exercises/:id" element={<ExerciseDetailPage />} />
       </Route>
     </Routes>
   );

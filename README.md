@@ -79,7 +79,7 @@ actual:
 - [x] **Fase 1** — Infraestructura: monorepo, tooling, Docker Compose, CI, `/health`.
 - [x] **Fase 2** — Autenticación y onboarding.
 - [x] **Fase 3** — Motor educativo y contenido insignia (5 cursos, 11 módulos, 29 lecciones reales).
-- [ ] Fase 4 — Motor de ejercicios.
+- [x] **Fase 4** — Motor de ejercicios (22 ejercicios reales, 7 tipos con corrección automática, XP anti-explotación, aprendizaje adaptativo).
 - [ ] Fase 5 — Code labs.
 - [ ] Fase 6 — Proyectos, portfolio y CV.
 - [ ] Fase 7 — Simulador de empresa y casos reales.
