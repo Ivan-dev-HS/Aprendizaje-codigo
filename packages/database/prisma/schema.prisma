@@ -444,6 +444,13 @@ model Case {
   expected    String
   actual      String
   hints       Json
+  /// Opciones de diagnóstico { id, label }[] (igual forma que ExerciseOption).
+  /// El diagnóstico es de opción múltiple, no texto libre: comparar texto
+  /// libre contra una única `solution` en prosa sería una UX mala/injusta
+  /// (una redacción distinta de la misma causa raíz se marcaría como error).
+  options     Json
+  /// id de la opción correcta dentro de `options` (mismo patrón que
+  /// Exercise.solution para MCQ/DEBUGGING).
   solution    String
   explanation String
   points      Int
@@ -464,6 +471,7 @@ model CaseAttempt {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   caseId     String
   case       Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  /// id de la opción de `Case.options` elegida por el usuario.
   diagnosis  String
   isCorrect  Boolean
   hintsUsed  Int      @default(0)

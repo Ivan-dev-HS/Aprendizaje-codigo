@@ -12,6 +12,7 @@ import { labsRouter } from "../modules/labs/labs.routes.js";
 import { projectsRouter } from "../modules/projects/projects.routes.js";
 import { portfolioRouter } from "../modules/portfolio/portfolio.routes.js";
 import { resumeRouter } from "../modules/resume/resume.routes.js";
+import { casesRouter } from "../modules/cases/cases.routes.js";
 
 /**
  * Router raíz de la API, montado bajo /api/v1 en app.ts.
@@ -32,3 +33,4 @@ apiRouter.use("/labs", labsRouter);
 apiRouter.use("/projects", projectsRouter);
 apiRouter.use("/portfolio", portfolioRouter);
 apiRouter.use("/resume", resumeRouter);
+apiRouter.use("/cases", casesRouter);
