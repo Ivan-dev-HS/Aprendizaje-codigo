@@ -13,6 +13,10 @@ import { projectsRouter } from "../modules/projects/projects.routes.js";
 import { portfolioRouter } from "../modules/portfolio/portfolio.routes.js";
 import { resumeRouter } from "../modules/resume/resume.routes.js";
 import { casesRouter } from "../modules/cases/cases.routes.js";
+import { ticketsRouter } from "../modules/tickets/tickets.routes.js";
+import { sprintsRouter } from "../modules/sprints/sprints.routes.js";
+import { standupsRouter } from "../modules/standups/standups.routes.js";
+import { pullRequestsRouter } from "../modules/pull-requests/pull-requests.routes.js";
 
 /**
  * Router raíz de la API, montado bajo /api/v1 en app.ts.
@@ -34,3 +38,7 @@ apiRouter.use("/projects", projectsRouter);
 apiRouter.use("/portfolio", portfolioRouter);
 apiRouter.use("/resume", resumeRouter);
 apiRouter.use("/cases", casesRouter);
+apiRouter.use("/tickets", ticketsRouter);
+apiRouter.use("/sprints", sprintsRouter);
+apiRouter.use("/standups", standupsRouter);
+apiRouter.use("/pull-requests", pullRequestsRouter);

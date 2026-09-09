@@ -651,6 +651,11 @@ model PullRequest {
   title       String
   description String
   diff        String
+  /// { id, label, isRealIssue }[] — igual patrón que Case.options: el
+  /// ejercicio de code review es de selección estructurada (marcar qué
+  /// líneas/aspectos son problemas reales), no texto libre comparado contra
+  /// una redacción experta, que sería una UX de corrección injusta.
+  candidateIssues Json
   status      String   @default("OPEN")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -843,6 +848,7 @@ enum XpSource {
   CASE
   PROJECT
   TICKET
+  CODE_REVIEW
   INTERVIEW
   ACHIEVEMENT
   MISSION

@@ -65,6 +65,12 @@ export function NavBar() {
           >
             Casos
           </Link>
+          <Link
+            to="/company"
+            className="text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+          >
+            Nexora Tech
+          </Link>
         </div>
         <div className="flex items-center gap-3">
           {user && (

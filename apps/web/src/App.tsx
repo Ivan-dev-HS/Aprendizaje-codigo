@@ -23,6 +23,11 @@ import { PublicPortfolioPage } from "./features/portfolio/PublicPortfolioPage";
 import { ResumeBuilderPage } from "./features/portfolio/ResumeBuilderPage";
 import { CasesPage } from "./features/cases/CasesPage";
 import { CaseDetailPage } from "./features/cases/CaseDetailPage";
+import { TicketsBoardPage } from "./features/company/TicketsBoardPage";
+import { TicketDetailPage } from "./features/company/TicketDetailPage";
+import { StandupPage } from "./features/company/StandupPage";
+import { CodeReviewsPage } from "./features/company/CodeReviewsPage";
+import { CodeReviewDetailPage } from "./features/company/CodeReviewDetailPage";
 import { GuestOnlyRoute, ProtectedRoute, RequireOnboarding } from "./app/protected-route";
 
 // Monaco Editor es pesado (~1MB gzip): se separa en su propio chunk y solo se
@@ -102,6 +107,11 @@ export function App() {
         <Route path="/resume" element={<ResumeBuilderPage />} />
         <Route path="/cases" element={<CasesPage />} />
         <Route path="/cases/:id" element={<CaseDetailPage />} />
+        <Route path="/company" element={<TicketsBoardPage />} />
+        <Route path="/company/tickets/:id" element={<TicketDetailPage />} />
+        <Route path="/company/standup" element={<StandupPage />} />
+        <Route path="/company/code-reviews" element={<CodeReviewsPage />} />
+        <Route path="/company/code-reviews/:id" element={<CodeReviewDetailPage />} />
       </Route>
     </Routes>
   );

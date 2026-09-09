@@ -8,6 +8,7 @@ import { seedExerciseContent } from "./exercises.js";
 import { seedSqlLab } from "./sql-lab.js";
 import { seedProjects } from "./projects.js";
 import { seedCases } from "./cases.js";
+import { seedCompany } from "./company.js";
 
 /**
  * Punto de entrada del seed. Idempotente (sección 98): ejecutarlo varias veces
@@ -26,8 +27,9 @@ async function main() {
   await seedSqlLab();
   await seedProjects();
   await seedCases();
+  await seedCompany();
 
-  // Fase 7+: seedCompany, seedInterviews, seedAchievements...
+  // Fase 8+: seedInterviews, seedAchievements...
 
   console.log("Seed completado.");
 }
