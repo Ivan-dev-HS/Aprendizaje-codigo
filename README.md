@@ -83,7 +83,7 @@ actual:
 - [x] **Fase 5** — Code labs: exec-service real (JS/SQL aislados), Playground HTML/CSS/JS, JS Lab, SQL Lab, Terminal Lab, Git Lab (Monaco Editor self-hosted).
 - [x] **Fase 6** — Proyectos (3 reales, niveles L1/L3/L5), Portfolio público en `/portfolio/:username` y CV Builder con exportación a PDF.
 - [x] **Fase 7** — Simulador de empresa Nexora Tech (tickets, sprint, standups, code review) + 14 casos reales de diagnóstico (Debugging/IT Support/Networking/Producción).
-- [ ] Fase 8 — Entrevistas.
+- [x] **Fase 8** — Entrevistas: banco de 24 preguntas reales en 6 plantillas cronometradas (Technical/Behavioral/Frontend/Backend/Full Stack/IT Support), puntuación heurística Technical/Problem Solving/Communication/Confidence/Overall (basada en reglas, no IA).
 - [ ] Fase 9 — Gamificación, dashboard, notificaciones, búsqueda.
 - [ ] Fase 10 — Admin y analítica.
 - [ ] Fase 11 — Endurecimiento final (checklist SPEC.md §111).

@@ -17,6 +17,7 @@ import { ticketsRouter } from "../modules/tickets/tickets.routes.js";
 import { sprintsRouter } from "../modules/sprints/sprints.routes.js";
 import { standupsRouter } from "../modules/standups/standups.routes.js";
 import { pullRequestsRouter } from "../modules/pull-requests/pull-requests.routes.js";
+import { interviewsRouter } from "../modules/interviews/interviews.routes.js";
 
 /**
  * Router raíz de la API, montado bajo /api/v1 en app.ts.
@@ -42,3 +43,4 @@ apiRouter.use("/tickets", ticketsRouter);
 apiRouter.use("/sprints", sprintsRouter);
 apiRouter.use("/standups", standupsRouter);
 apiRouter.use("/pull-requests", pullRequestsRouter);
+apiRouter.use("/interviews", interviewsRouter);

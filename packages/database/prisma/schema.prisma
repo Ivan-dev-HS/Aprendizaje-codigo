@@ -708,13 +708,22 @@ enum InterviewCategory {
 
 model InterviewQuestion {
   id             String            @id @default(cuid())
+  /// Clave estable para seeding idempotente (mismo patrón que Case.slug).
+  slug           String            @unique
   category       InterviewCategory
   skillId        String?
   skill          Skill?            @relation(fields: [skillId], references: [id])
   difficulty     Difficulty
   prompt         String
   expectedAnswer String
+  /// string[] — conceptos clave esperados en una buena respuesta. Se usan
+  /// para puntuar por cobertura de conceptos mencionados (nunca comparando
+  /// texto libre contra `expectedAnswer` palabra por palabra).
   concepts       Json
+  /// string[] — errores típicos en este tema, mostrados como contenido
+  /// educativo tras responder (nunca usados para penalizar automáticamente:
+  /// detectar una "frase equivocada" en texto libre sería una corrección
+  /// injusta y frágil).
   commonMistakes Json
   createdAt      DateTime          @default(now())
 
@@ -775,7 +784,14 @@ model InterviewAnswer {
   question         InterviewQuestion @relation(fields: [questionId], references: [id])
   answerText       String
   timeSpentSeconds Int               @default(0)
-  score            Int?
+  /// Puntuación global de esta respuesta (0-100). Las 4 dimensiones de abajo
+  /// se promedian entre todas las respuestas de un intento para obtener los
+  /// scores de InterviewAttempt (sección 39 de SPEC.md).
+  score              Int?
+  technicalScore     Int?
+  problemSolvingScore Int?
+  communicationScore  Int?
+  confidenceScore     Int?
 
   @@index([attemptId])
 }
