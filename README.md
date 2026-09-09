@@ -80,7 +80,7 @@ actual:
 - [x] **Fase 2** — Autenticación y onboarding.
 - [x] **Fase 3** — Motor educativo y contenido insignia (5 cursos, 11 módulos, 29 lecciones reales).
 - [x] **Fase 4** — Motor de ejercicios (22 ejercicios reales, 7 tipos con corrección automática, XP anti-explotación, aprendizaje adaptativo).
-- [ ] Fase 5 — Code labs.
+- [x] **Fase 5** — Code labs: exec-service real (JS/SQL aislados), Playground HTML/CSS/JS, JS Lab, SQL Lab, Terminal Lab, Git Lab (Monaco Editor self-hosted).
 - [ ] Fase 6 — Proyectos, portfolio y CV.
 - [ ] Fase 7 — Simulador de empresa y casos reales.
 - [ ] Fase 8 — Entrevistas.

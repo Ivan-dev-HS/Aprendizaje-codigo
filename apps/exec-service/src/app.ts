@@ -2,11 +2,8 @@ import express, { type Express } from "express";
 import helmet from "helmet";
 import { pinoHttp } from "pino-http";
 import { logger } from "./lib/logger.js";
-
-// NOTA: el router `/exec` (ejecución aislada de JS y SQL, ver
-// IMPLEMENTATION_PLAN.md §7) se añade en la Fase 5, junto con los labs de
-// código que lo consumen. `requireInternalToken` ya está implementado y se
-// aplicará a ese router cuando se monte.
+import { requireInternalToken } from "./middleware/internal-auth.js";
+import { execRouter } from "./modules/exec/exec.routes.js";
 
 export function createApp(): Express {
   const app = express();
@@ -19,6 +16,11 @@ export function createApp(): Express {
   app.get("/health", (_req, res) => {
     res.status(200).json({ status: "ok", uptimeSeconds: Math.round(process.uptime()) });
   });
+
+  // Único punto de entrada de código de usuario. Nunca se expone al público
+  // (ver docker-compose.yml: sin `ports`) y exige el token interno compartido
+  // con la API principal en cada request.
+  app.use("/exec", requireInternalToken, execRouter);
 
   app.use((_req, res) => {
     res

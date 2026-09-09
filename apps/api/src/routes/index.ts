@@ -8,6 +8,7 @@ import { lessonsRouter } from "../modules/lessons/lessons.routes.js";
 import { skillsRouter } from "../modules/skills/skills.routes.js";
 import { learningPathsRouter } from "../modules/learning-paths/learning-paths.routes.js";
 import { exercisesRouter } from "../modules/exercises/exercises.routes.js";
+import { labsRouter } from "../modules/labs/labs.routes.js";
 
 /**
  * Router raíz de la API, montado bajo /api/v1 en app.ts.
@@ -24,3 +25,4 @@ apiRouter.use("/lessons", lessonsRouter);
 apiRouter.use("/skills", skillsRouter);
 apiRouter.use("/learning-paths", learningPathsRouter);
 apiRouter.use("/exercises", exercisesRouter);
+apiRouter.use("/labs", labsRouter);

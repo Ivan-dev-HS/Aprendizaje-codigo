@@ -32,6 +32,12 @@ export function NavBar() {
           >
             Ejercicios
           </Link>
+          <Link
+            to="/labs"
+            className="text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+          >
+            Labs
+          </Link>
         </div>
         <div className="flex items-center gap-3">
           {user && (

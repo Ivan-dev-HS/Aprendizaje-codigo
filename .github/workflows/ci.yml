@@ -50,14 +50,26 @@ jobs:
       - name: Apply database migrations
         run: pnpm db:migrate:deploy
 
+      - name: Seed database (los tests de integración de /labs usan el SQL Lab sembrado)
+        run: pnpm db:seed
+
       - name: Lint
         run: pnpm lint
 
       - name: Typecheck
         run: pnpm typecheck
 
+      - name: Start exec-service (usado por los tests de integración de /labs)
+        run: |
+          pnpm --filter @codeforge/exec-service run start &
+          npx wait-on http://localhost:4100/health -t 30000
+        env:
+          SANDBOX_DATABASE_URL: postgresql://codeforge_sandbox:codeforge_sandbox_password@localhost:5432/codeforge?schema=sandbox
+
       - name: Unit & integration tests
         run: pnpm test
+        env:
+          EXEC_SERVICE_URL: http://localhost:4100
 
       - name: Build
         run: pnpm build

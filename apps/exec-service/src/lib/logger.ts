@@ -1,8 +1,8 @@
 import pino from "pino";
-import { env, isProduction } from "../config/env.js";
+import { env, isProduction, isTest } from "../config/env.js";
 
 export const logger = pino({
-  level: env.LOG_LEVEL,
+  level: isTest ? "silent" : env.LOG_LEVEL,
   redact: { paths: ["req.headers.authorization", "*.token"], censor: "[REDACTED]" },
   transport: isProduction
     ? undefined
