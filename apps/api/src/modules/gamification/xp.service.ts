@@ -6,7 +6,7 @@ import { prisma, Prisma, type XpSource } from "@codeforge/database";
  * ahora. Se puede sofisticar en la Fase 9 (gamificación completa) sin tocar el
  * resto del sistema, ya que todo el mundo pasa por `computeLevel`.
  */
-const XP_PER_LEVEL = 100;
+export const XP_PER_LEVEL = 100;
 
 export function computeLevel(totalXp: number): number {
   return Math.max(1, Math.floor(totalXp / XP_PER_LEVEL) + 1);

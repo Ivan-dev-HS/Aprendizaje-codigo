@@ -10,6 +10,8 @@ import { seedProjects } from "./projects.js";
 import { seedCases } from "./cases.js";
 import { seedCompany } from "./company.js";
 import { seedInterviews } from "./interviews.js";
+import { seedAchievements } from "./achievements.js";
+import { seedMissions } from "./missions.js";
 
 /**
  * Punto de entrada del seed. Idempotente (sección 98): ejecutarlo varias veces
@@ -30,8 +32,8 @@ async function main() {
   await seedCases();
   await seedCompany();
   await seedInterviews();
-
-  // Fase 9+: seedAchievements...
+  await seedAchievements();
+  await seedMissions();
 
   console.log("Seed completado.");
 }

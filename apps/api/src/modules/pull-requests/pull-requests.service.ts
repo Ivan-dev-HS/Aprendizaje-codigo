@@ -7,7 +7,7 @@ import type {
 } from "@codeforge/types";
 import type { SubmitCodeReviewInput } from "@codeforge/validators";
 import { HttpError } from "../../lib/http-error.js";
-import { awardXp } from "../gamification/xp.service.js";
+import { awardXpAndCheckProgress } from "../gamification/progress.service.js";
 import { pullRequestsRepository } from "./pull-requests.repository.js";
 
 interface StoredCandidateIssue extends CandidateIssueOption {
@@ -97,7 +97,7 @@ export const pullRequestsService = {
     const xpForAttempt = Math.round((baseXp * score) / 100);
     const xpResult =
       previousAttempts === 0
-        ? await awardXp(userId, xpForAttempt, "CODE_REVIEW", id)
+        ? await awardXpAndCheckProgress(userId, xpForAttempt, "CODE_REVIEW", id)
         : { awarded: 0, alreadyAwarded: true, leveledUp: false };
 
     return {

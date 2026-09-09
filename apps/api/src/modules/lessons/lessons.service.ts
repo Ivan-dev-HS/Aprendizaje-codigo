@@ -1,6 +1,7 @@
 import type { LessonBlock, LessonDetail } from "@codeforge/types";
 import { HttpError } from "../../lib/http-error.js";
-import { awardXp, recordProgressEvent } from "../gamification/xp.service.js";
+import { recordProgressEvent } from "../gamification/xp.service.js";
+import { awardXpAndCheckProgress } from "../gamification/progress.service.js";
 import { computeModuleLocks } from "../courses/module-lock.js";
 import { coursesRepository } from "../courses/courses.repository.js";
 import { lessonsRepository } from "./lessons.repository.js";
@@ -72,7 +73,7 @@ export const lessonsService = {
     await assertUnlocked(lesson, userId);
 
     await lessonsRepository.upsertProgress(userId, lessonId);
-    const xpResult = await awardXp(userId, LESSON_XP, "LESSON", lessonId);
+    const xpResult = await awardXpAndCheckProgress(userId, LESSON_XP, "LESSON", lessonId);
     await recordProgressEvent(userId, "lesson_completed", { lessonId });
 
     return {

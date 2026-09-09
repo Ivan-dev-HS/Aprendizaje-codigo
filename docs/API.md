@@ -69,9 +69,12 @@ Especificación OpenAPI (se irá completando por fase): `apps/api/openapi.yaml`.
 | POST           | `/interviews/:id/answer`               | Responde una pregunta; puntúa y en la última cierra el intento y otorga XP                                | 8    |
 | GET            | `/interviews/attempts/me`              | Historial de intentos del usuario                                                                         | 8    |
 | GET            | `/interviews/attempts/:attemptId`      | Detalle de un intento: feedback y respuesta modelo por pregunta                                           | 8    |
-| GET            | `/gamification/me`                     | XP, nivel, racha, achievements, missions                                                                  | 9    |
-| GET            | `/notifications`                       | Notificaciones del usuario                                                                                | 9    |
-| GET            | `/search?q=`                           | Búsqueda global                                                                                           | 9    |
+| GET            | `/gamification/me`                     | XP, nivel, racha, readiness, achievements, missions, actividad reciente                                   | 9    |
+| POST           | `/gamification/achievements/ack`       | Marca logros como vistos (deja de mostrarlos como "nuevos")                                               | 9    |
+| GET            | `/notifications`                       | Notificaciones del usuario, paginadas, con unreadCount                                                    | 9    |
+| POST           | `/notifications/read-all`              | Marca todas las notificaciones como leídas                                                                | 9    |
+| PATCH          | `/notifications/:id/read`              | Marca una notificación como leída                                                                         | 9    |
+| GET            | `/search?q=`                           | Búsqueda global (cursos/lecciones/ejercicios/casos/proyectos/entrevistas)                                 | 9    |
 | GET            | `/admin/*`                             | CRUD de administración (courses, exercises, users...)                                                     | 10   |
 | GET            | `/admin/analytics`                     | Analítica agregada                                                                                        | 10   |
 

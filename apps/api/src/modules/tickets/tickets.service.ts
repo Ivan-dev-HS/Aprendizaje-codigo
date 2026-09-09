@@ -1,7 +1,9 @@
 import type { TicketDetail, TicketPerson, TicketSummary } from "@codeforge/types";
 import type { AddTicketCommentInput, UpdateTicketInput } from "@codeforge/validators";
 import { HttpError } from "../../lib/http-error.js";
-import { awardXp, recordProgressEvent } from "../gamification/xp.service.js";
+import { recordProgressEvent } from "../gamification/xp.service.js";
+import { awardXpAndCheckProgress } from "../gamification/progress.service.js";
+import { notificationsService } from "../notifications/notifications.service.js";
 import { ticketsRepository, type TicketFilters } from "./tickets.repository.js";
 import { TICKET_XP_BY_PRIORITY } from "./xp-by-priority.js";
 
@@ -82,7 +84,7 @@ export const ticketsService = {
         becomingDone ? TICKET_XP_BY_PRIORITY[t.priority] : undefined,
       );
       if (becomingDone) {
-        const xpResult = await awardXp(
+        const xpResult = await awardXpAndCheckProgress(
           userId,
           TICKET_XP_BY_PRIORITY[t.priority],
           "TICKET",
@@ -103,6 +105,17 @@ export const ticketsService = {
     if (!t) throw HttpError.notFound("Ticket no encontrado.");
 
     const comment = await ticketsRepository.addComment(id, userId, input.body);
+
+    if (t.assigneeId && t.assigneeId !== userId) {
+      await notificationsService.create(
+        t.assigneeId,
+        "TICKET",
+        `Nuevo comentario en ${t.code}`,
+        `${comment.author?.profile?.displayName ?? "Alguien"} comentó en "${t.title}".`,
+        `/company/tickets/${id}`,
+      );
+    }
+
     return {
       id: comment.id,
       author: toPerson(comment.author) as TicketPerson,

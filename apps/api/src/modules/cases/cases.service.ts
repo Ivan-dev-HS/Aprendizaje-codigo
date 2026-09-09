@@ -6,7 +6,8 @@ import type {
 } from "@codeforge/types";
 import type { CaseListQueryInput, SubmitCaseAttemptInput } from "@codeforge/validators";
 import { HttpError } from "../../lib/http-error.js";
-import { awardXp, recordProgressEvent } from "../gamification/xp.service.js";
+import { recordProgressEvent } from "../gamification/xp.service.js";
+import { awardXpAndCheckProgress } from "../gamification/progress.service.js";
 import { casesRepository, type CaseFilters } from "./cases.repository.js";
 
 const SOLUTION_REVEAL_AFTER_ATTEMPTS = 3;
@@ -135,7 +136,7 @@ export const casesService = {
     });
 
     const xpResult = isCorrect
-      ? await awardXp(userId, xpForAttempt, "CASE", caseId)
+      ? await awardXpAndCheckProgress(userId, xpForAttempt, "CASE", caseId)
       : { awarded: 0, alreadyAwarded: false, leveledUp: false };
 
     await recordProgressEvent(userId, isCorrect ? "case_completed" : "case_failed", {

@@ -92,6 +92,23 @@ export function PortfolioPreview({ portfolio }: { portfolio: PortfolioView }) {
         </div>
       )}
 
+      {portfolio.achievements.length > 0 && (
+        <div className="mt-4">
+          <h3 className="mb-2 text-sm font-semibold">Logros</h3>
+          <div className="flex flex-wrap gap-2">
+            {portfolio.achievements.map((a) => (
+              <span
+                key={a.slug}
+                title={a.title}
+                className="flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs dark:bg-slate-800"
+              >
+                <span aria-hidden="true">{a.icon}</span> {a.title}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
       {portfolio.education.length > 0 && (
         <div className="mt-4">
           <h3 className="mb-2 text-sm font-semibold">Formación</h3>

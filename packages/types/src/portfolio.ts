@@ -35,6 +35,12 @@ export interface PortfolioSkillSummary {
   masteryScore: number;
 }
 
+export interface PortfolioAchievementSummary {
+  slug: string;
+  title: string;
+  icon: string;
+}
+
 /** Sección 36 de SPEC.md: se compone en vivo a partir de datos reales de la plataforma. */
 export interface PortfolioView {
   username: string;
@@ -47,6 +53,7 @@ export interface PortfolioView {
   totalXp: number;
   skills: PortfolioSkillSummary[];
   projects: PortfolioProjectSummary[];
+  achievements: PortfolioAchievementSummary[];
   education: ResumeEducationItem[];
   links: ResumeLinkItem[];
 }

@@ -8,7 +8,8 @@ import type {
 } from "@codeforge/types";
 import type { SubmitInterviewAnswerInput } from "@codeforge/validators";
 import { HttpError } from "../../lib/http-error.js";
-import { awardXp, recordProgressEvent } from "../gamification/xp.service.js";
+import { recordProgressEvent } from "../gamification/xp.service.js";
+import { awardXpAndCheckProgress } from "../gamification/progress.service.js";
 import { aggregateAttemptScores, scoreAnswer } from "./interview-scoring.js";
 import { interviewsRepository, type InterviewFilters } from "./interviews.repository.js";
 
@@ -215,7 +216,12 @@ export const interviewsService = {
     }));
     const scores = aggregateAttemptScores(allBreakdowns);
 
-    const xpResult = await awardXp(userId, XP_PER_INTERVIEW, "INTERVIEW", interviewId);
+    const xpResult = await awardXpAndCheckProgress(
+      userId,
+      XP_PER_INTERVIEW,
+      "INTERVIEW",
+      interviewId,
+    );
     await interviewsRepository.finalizeAttempt(attempt.id, {
       ...scores,
       xpAwarded: xpResult.awarded,

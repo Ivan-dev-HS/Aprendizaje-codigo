@@ -84,7 +84,7 @@ actual:
 - [x] **Fase 6** — Proyectos (3 reales, niveles L1/L3/L5), Portfolio público en `/portfolio/:username` y CV Builder con exportación a PDF.
 - [x] **Fase 7** — Simulador de empresa Nexora Tech (tickets, sprint, standups, code review) + 14 casos reales de diagnóstico (Debugging/IT Support/Networking/Producción).
 - [x] **Fase 8** — Entrevistas: banco de 24 preguntas reales en 6 plantillas cronometradas (Technical/Behavioral/Frontend/Backend/Full Stack/IT Support), puntuación heurística Technical/Problem Solving/Communication/Confidence/Overall (basada en reglas, no IA).
-- [ ] Fase 9 — Gamificación, dashboard, notificaciones, búsqueda.
+- [x] **Fase 9** — Gamificación (22 logros, 6 misiones diarias/semanales), Dashboard (readiness score, meta diaria, actividad reciente), notificaciones y búsqueda global, con un toque "estilo Duolingo" (racha animada, celebraciones de nivel/logro, mascota).
 - [ ] Fase 10 — Admin y analítica.
 - [ ] Fase 11 — Endurecimiento final (checklist SPEC.md §111).
 

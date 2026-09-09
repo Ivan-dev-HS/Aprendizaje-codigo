@@ -18,6 +18,9 @@ import { sprintsRouter } from "../modules/sprints/sprints.routes.js";
 import { standupsRouter } from "../modules/standups/standups.routes.js";
 import { pullRequestsRouter } from "../modules/pull-requests/pull-requests.routes.js";
 import { interviewsRouter } from "../modules/interviews/interviews.routes.js";
+import { gamificationRouter } from "../modules/gamification/gamification.routes.js";
+import { notificationsRouter } from "../modules/notifications/notifications.routes.js";
+import { searchRouter } from "../modules/search/search.routes.js";
 
 /**
  * Router raíz de la API, montado bajo /api/v1 en app.ts.
@@ -44,3 +47,6 @@ apiRouter.use("/sprints", sprintsRouter);
 apiRouter.use("/standups", standupsRouter);
 apiRouter.use("/pull-requests", pullRequestsRouter);
 apiRouter.use("/interviews", interviewsRouter);
+apiRouter.use("/gamification", gamificationRouter);
+apiRouter.use("/notifications", notificationsRouter);
+apiRouter.use("/search", searchRouter);

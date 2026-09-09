@@ -10,7 +10,8 @@ import type {
   SubmitExerciseAttemptInput,
 } from "@codeforge/validators";
 import { HttpError } from "../../lib/http-error.js";
-import { awardXp, recordProgressEvent } from "../gamification/xp.service.js";
+import { recordProgressEvent } from "../gamification/xp.service.js";
+import { awardXpAndCheckProgress } from "../gamification/progress.service.js";
 import { updateMasteryOnAttempt } from "../skills/mastery-update.js";
 import { calculateXpForAttempt, gradeAttempt } from "./grading.js";
 import { exercisesRepository, type ExerciseFilters } from "./exercises.repository.js";
@@ -172,7 +173,7 @@ export const exercisesService = {
     });
 
     const xpResult = isCorrect
-      ? await awardXp(userId, xpForAttempt, "EXERCISE", exerciseId)
+      ? await awardXpAndCheckProgress(userId, xpForAttempt, "EXERCISE", exerciseId)
       : { awarded: 0, alreadyAwarded: false, leveledUp: false };
 
     const skillUpdate = await updateMasteryOnAttempt(userId, exercise.skillId, isCorrect);

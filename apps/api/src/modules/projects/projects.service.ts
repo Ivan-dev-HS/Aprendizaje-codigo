@@ -1,7 +1,8 @@
 import type { ProjectDetail, ProjectSummary, UserProjectStatus } from "@codeforge/types";
 import type { UpdateUserProjectInput } from "@codeforge/validators";
 import { HttpError } from "../../lib/http-error.js";
-import { awardXp, recordProgressEvent } from "../gamification/xp.service.js";
+import { recordProgressEvent } from "../gamification/xp.service.js";
+import { awardXpAndCheckProgress } from "../gamification/progress.service.js";
 import { projectsRepository } from "./projects.repository.js";
 import { PROJECT_XP_BY_LEVEL } from "./xp-by-level.js";
 
@@ -125,7 +126,7 @@ export const projectsService = {
     if (allDone && refreshed && refreshed.status !== "COMPLETED") {
       await projectsRepository.completeUserProject(refreshed.id);
       const amount = PROJECT_XP_BY_LEVEL[project.level];
-      xpResult = await awardXp(userId, amount, "PROJECT", projectId);
+      xpResult = await awardXpAndCheckProgress(userId, amount, "PROJECT", projectId);
       await recordProgressEvent(userId, "project_completed", { projectId });
     }
 

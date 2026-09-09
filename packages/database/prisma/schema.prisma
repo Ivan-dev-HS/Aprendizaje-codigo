@@ -820,6 +820,10 @@ model UserAchievement {
   achievementId String
   achievement   Achievement @relation(fields: [achievementId], references: [id])
   unlockedAt    DateTime    @default(now())
+  /// null hasta que el frontend confirma haber mostrado la celebración
+  /// (`POST /gamification/achievements/ack`) — permite mostrar el logro una
+  /// sola vez sin importar desde qué acción se desbloqueó.
+  seenAt        DateTime?
 
   @@unique([userId, achievementId])
   @@index([userId])

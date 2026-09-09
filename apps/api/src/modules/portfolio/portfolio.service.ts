@@ -1,5 +1,6 @@
 import { prisma } from "@codeforge/database";
 import type {
+  PortfolioAchievementSummary,
   PortfolioProjectSummary,
   PortfolioSettings,
   PortfolioSkillSummary,
@@ -25,6 +26,10 @@ async function composeView(userId: string): Promise<PortfolioView> {
         include: { project: true },
         orderBy: { completedAt: "desc" },
       },
+      userAchievements: {
+        include: { achievement: true },
+        orderBy: { unlockedAt: "desc" },
+      },
     },
   });
   if (!user || !user.profile) throw HttpError.notFound("Usuario no encontrado.");
@@ -36,6 +41,12 @@ async function composeView(userId: string): Promise<PortfolioView> {
       name: us.skill.name,
       masteryScore: us.masteryScore,
     }));
+
+  const achievements: PortfolioAchievementSummary[] = user.userAchievements.map((ua) => ({
+    slug: ua.achievement.slug,
+    title: ua.achievement.title,
+    icon: ua.achievement.icon,
+  }));
 
   const projects: PortfolioProjectSummary[] = user.userProjects.map((up) => ({
     slug: up.project.slug,
@@ -59,6 +70,7 @@ async function composeView(userId: string): Promise<PortfolioView> {
     totalXp: user.profile.totalXp,
     skills,
     projects,
+    achievements,
     education: (user.resume?.education as ResumeEducationItem[] | null) ?? [],
     links: (user.resume?.links as ResumeLinkItem[] | null) ?? [],
   };

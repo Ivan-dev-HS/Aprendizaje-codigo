@@ -31,6 +31,7 @@ import { CodeReviewDetailPage } from "./features/company/CodeReviewDetailPage";
 import { InterviewsPage } from "./features/interviews/InterviewsPage";
 import { InterviewSimulationPage } from "./features/interviews/InterviewSimulationPage";
 import { InterviewAttemptDetailPage } from "./features/interviews/InterviewAttemptDetailPage";
+import { AchievementsPage } from "./features/gamification/AchievementsPage";
 import { GuestOnlyRoute, ProtectedRoute, RequireOnboarding } from "./app/protected-route";
 
 // Monaco Editor es pesado (~1MB gzip): se separa en su propio chunk y solo se
@@ -121,6 +122,7 @@ export function App() {
           element={<InterviewAttemptDetailPage />}
         />
         <Route path="/interviews/:slug" element={<InterviewSimulationPage />} />
+        <Route path="/achievements" element={<AchievementsPage />} />
       </Route>
     </Routes>
   );
