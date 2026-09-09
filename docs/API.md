@@ -47,10 +47,13 @@ Especificación OpenAPI (se irá completando por fase): `apps/api/openapi.yaml`.
 | GET/POST       | `/labs/git`                                            | Estado y comandos de la Git Lab (grafo de commits simulado)                 | 5    |
 | GET            | `/cases`, `/cases/:id`                                 | Debugging / IT Support / Networking / Producción                            | 7    |
 | POST           | `/cases/:id/attempt`                                   | Envía diagnóstico (+ postmortem si aplica)                                  | 7    |
-| GET            | `/projects`, `/projects/:slug`                         | Catálogo de proyectos                                                       | 6    |
-| POST           | `/projects/:id/start`, PATCH `/projects/:id`           | Progreso de proyecto                                                        | 6    |
-| GET/PATCH      | `/portfolio/me`, GET `/portfolio/:username`            | Portfolio builder / página pública                                          | 6    |
-| GET/PATCH      | `/resume/me`                                           | CV builder                                                                  | 6    |
+| GET            | `/projects`, `/projects/:slug`                         | Catálogo de proyectos (con estado del usuario si hay sesión)                | 6    |
+| POST           | `/projects/:id/start`                                  | Inicia un proyecto (idempotente)                                            | 6    |
+| PATCH          | `/projects/:id`                                        | githubUrl/demoUrl/readme/screenshots/technologies del usuario               | 6    |
+| POST           | `/projects/:id/tasks/:taskId/complete`                 | Marca una tarea hecha; al completar todas otorga XP una vez                 | 6    |
+| GET/PATCH      | `/portfolio/me`                                        | Ajustes (isPublic/headline/theme) + vista previa compuesta en vivo          | 6    |
+| GET            | `/portfolio/:username`                                 | Portfolio público (404 si no existe o no es público)                        | 6    |
+| GET/PATCH      | `/resume/me`                                           | CV builder: resumen/experiencia/educación/enlaces + skills/proyectos reales | 6    |
 | GET            | `/tickets`, `/sprints/current`                         | Simulador de empresa                                                        | 7    |
 | POST           | `/tickets/:id/comments`, PATCH `/tickets/:id`          | Interacción con tickets                                                     | 7    |
 | POST           | `/tickets/:id/pull-request`                            | Abre PR simulado                                                            | 7    |

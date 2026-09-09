@@ -9,6 +9,9 @@ import { skillsRouter } from "../modules/skills/skills.routes.js";
 import { learningPathsRouter } from "../modules/learning-paths/learning-paths.routes.js";
 import { exercisesRouter } from "../modules/exercises/exercises.routes.js";
 import { labsRouter } from "../modules/labs/labs.routes.js";
+import { projectsRouter } from "../modules/projects/projects.routes.js";
+import { portfolioRouter } from "../modules/portfolio/portfolio.routes.js";
+import { resumeRouter } from "../modules/resume/resume.routes.js";
 
 /**
  * Router raíz de la API, montado bajo /api/v1 en app.ts.
@@ -26,3 +29,6 @@ apiRouter.use("/skills", skillsRouter);
 apiRouter.use("/learning-paths", learningPathsRouter);
 apiRouter.use("/exercises", exercisesRouter);
 apiRouter.use("/labs", labsRouter);
+apiRouter.use("/projects", projectsRouter);
+apiRouter.use("/portfolio", portfolioRouter);
+apiRouter.use("/resume", resumeRouter);

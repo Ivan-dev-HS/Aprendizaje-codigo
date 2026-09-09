@@ -38,6 +38,24 @@ export function NavBar() {
           >
             Labs
           </Link>
+          <Link
+            to="/projects"
+            className="text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+          >
+            Proyectos
+          </Link>
+          <Link
+            to="/portfolio"
+            className="text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+          >
+            Portfolio
+          </Link>
+          <Link
+            to="/resume"
+            className="text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+          >
+            CV
+          </Link>
         </div>
         <div className="flex items-center gap-3">
           {user && (
