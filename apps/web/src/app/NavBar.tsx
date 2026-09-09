@@ -44,6 +44,14 @@ export function NavBar() {
               {link.label}
             </Link>
           ))}
+          {user?.role === "ADMIN" && (
+            <Link
+              to="/admin"
+              className="shrink-0 text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+            >
+              Admin
+            </Link>
+          )}
         </div>
         <div className="flex items-center gap-3">
           <div className="hidden lg:block">

@@ -21,6 +21,7 @@ import { interviewsRouter } from "../modules/interviews/interviews.routes.js";
 import { gamificationRouter } from "../modules/gamification/gamification.routes.js";
 import { notificationsRouter } from "../modules/notifications/notifications.routes.js";
 import { searchRouter } from "../modules/search/search.routes.js";
+import { adminRouter } from "../modules/admin/admin.routes.js";
 
 /**
  * Router raíz de la API, montado bajo /api/v1 en app.ts.
@@ -50,3 +51,4 @@ apiRouter.use("/interviews", interviewsRouter);
 apiRouter.use("/gamification", gamificationRouter);
 apiRouter.use("/notifications", notificationsRouter);
 apiRouter.use("/search", searchRouter);
+apiRouter.use("/admin", adminRouter);

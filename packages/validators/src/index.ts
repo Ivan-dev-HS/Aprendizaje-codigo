@@ -8,3 +8,4 @@ export * from "./cases.js";
 export * from "./company.js";
 export * from "./interviews.js";
 export * from "./gamification.js";
+export * from "./admin.js";

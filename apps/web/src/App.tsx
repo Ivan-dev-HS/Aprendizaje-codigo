@@ -32,7 +32,18 @@ import { InterviewsPage } from "./features/interviews/InterviewsPage";
 import { InterviewSimulationPage } from "./features/interviews/InterviewSimulationPage";
 import { InterviewAttemptDetailPage } from "./features/interviews/InterviewAttemptDetailPage";
 import { AchievementsPage } from "./features/gamification/AchievementsPage";
-import { GuestOnlyRoute, ProtectedRoute, RequireOnboarding } from "./app/protected-route";
+import { AdminHomePage } from "./features/admin/AdminHomePage";
+import { AdminAnalyticsPage } from "./features/admin/AdminAnalyticsPage";
+import { AdminUsersPage } from "./features/admin/AdminUsersPage";
+import { AdminFeatureFlagsPage } from "./features/admin/AdminFeatureFlagsPage";
+import { AdminAuditLogPage } from "./features/admin/AdminAuditLogPage";
+import { GenericEntityAdminPage } from "./features/admin/GenericEntityAdminPage";
+import {
+  GuestOnlyRoute,
+  ProtectedRoute,
+  RequireAdmin,
+  RequireOnboarding,
+} from "./app/protected-route";
 
 // Monaco Editor es pesado (~1MB gzip): se separa en su propio chunk y solo se
 // descarga cuando el usuario visita un lab que realmente lo usa.
@@ -123,6 +134,15 @@ export function App() {
         />
         <Route path="/interviews/:slug" element={<InterviewSimulationPage />} />
         <Route path="/achievements" element={<AchievementsPage />} />
+      </Route>
+
+      <Route element={<RequireAdmin />}>
+        <Route path="/admin" element={<AdminHomePage />} />
+        <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
+        <Route path="/admin/users" element={<AdminUsersPage />} />
+        <Route path="/admin/feature-flags" element={<AdminFeatureFlagsPage />} />
+        <Route path="/admin/audit-log" element={<AdminAuditLogPage />} />
+        <Route path="/admin/:entity" element={<GenericEntityAdminPage />} />
       </Route>
     </Routes>
   );

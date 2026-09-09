@@ -85,7 +85,7 @@ actual:
 - [x] **Fase 7** — Simulador de empresa Nexora Tech (tickets, sprint, standups, code review) + 14 casos reales de diagnóstico (Debugging/IT Support/Networking/Producción).
 - [x] **Fase 8** — Entrevistas: banco de 24 preguntas reales en 6 plantillas cronometradas (Technical/Behavioral/Frontend/Backend/Full Stack/IT Support), puntuación heurística Technical/Problem Solving/Communication/Confidence/Overall (basada en reglas, no IA).
 - [x] **Fase 9** — Gamificación (22 logros, 6 misiones diarias/semanales), Dashboard (readiness score, meta diaria, actividad reciente), notificaciones y búsqueda global, con un toque "estilo Duolingo" (racha animada, celebraciones de nivel/logro, mascota).
-- [ ] Fase 10 — Admin y analítica.
+- [x] **Fase 10** — Panel de administración (`/admin`, protegido por rol ADMIN): CRUD real para las 9 entidades de la sección 46 (cursos, módulos, lecciones, ejercicios, proyectos, skills, logros, preguntas de entrevista, tickets), gestión de roles de usuario, analítica agregada, audit log y feature flags.
 - [ ] Fase 11 — Endurecimiento final (checklist SPEC.md §111).
 
 Ver `docs/CONTENT_BACKLOG.md` para el estado del contenido educativo por curso.
