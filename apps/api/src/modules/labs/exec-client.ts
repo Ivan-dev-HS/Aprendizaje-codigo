@@ -8,24 +8,32 @@ import { HttpError } from "../../lib/http-error.js";
  * el servicio de ejecución aislado, autenticado con un token interno que
  * jamás se expone al frontend.
  */
+// El verificador de tipos que usa Vercel para el build de la función
+// serverless no resuelve bien el `Response`/`fetch` globales de Fetch API en
+// este archivo — el único del proyecto que los usa sin importarlos (cada
+// controller usa el `Response` de Express, importado explícitamente, y ese
+// entorno de chequeo aislado no distingue ambos correctamente). Derivar el
+// tipo del propio `fetch` tampoco sirve: su firma global referencia el mismo
+// `Response` roto. Se define una interfaz mínima propia con solo lo que se
+// usa y se castea el resultado a ella, sin depender de ningún tipo ambiente.
+// Local funciona con normalidad de cualquier forma.
+interface FetchLikeResponse {
+  readonly status: number;
+  readonly ok: boolean;
+  json(): Promise<unknown>;
+}
+
 async function callExecService<T>(path: string, body: unknown): Promise<T> {
-  // Se deriva el tipo directamente de `fetch` en vez de nombrar `Response`
-  // aparte: el verificador de tipos que usa Vercel para el build de la
-  // función serverless no resuelve bien el `Response` global de Fetch API en
-  // este archivo (posiblemente porque el resto del proyecto usa masivamente
-  // el `Response` de Express — otro tipo, importado explícitamente en cada
-  // controller —, y su entorno de chequeo aislado no distingue ambos
-  // correctamente). Local funciona con normalidad.
-  let response: Awaited<ReturnType<typeof fetch>>;
+  let response: FetchLikeResponse;
   try {
-    response = await fetch(`${env.EXEC_SERVICE_URL}${path}`, {
+    response = (await fetch(`${env.EXEC_SERVICE_URL}${path}`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
         "x-internal-token": env.EXEC_SERVICE_INTERNAL_TOKEN,
       },
       body: JSON.stringify(body),
-    });
+    })) as unknown as FetchLikeResponse;
   } catch {
     throw HttpError.internal(
       "El servicio de ejecución de código no está disponible ahora mismo. Inténtalo de nuevo.",
