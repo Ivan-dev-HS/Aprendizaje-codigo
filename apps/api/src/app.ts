@@ -13,13 +13,18 @@ import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
 // no aplica `esModuleInterop` aunque esté declarado en tsconfig.json (no es
 // el `tsc` normal del proyecto, sino un paso propio de Vercel) — sin
 // interop, TS tipa el import por defecto de un módulo CJS `module.exports =
-// fn` (como helmet o express-rate-limit) como el objeto del módulo entero,
-// no como función, y el build falla con "This expression is not callable".
-// En runtime esto siempre funciona bien (Node interopera esos módulos con
-// normalidad); se castea al tipo invocable real en vez de al revés.
+// fn` (como helmet, cors, cookie-parser o express-rate-limit) como el
+// objeto del módulo entero, no como función, y el build falla con "This
+// expression is not callable". En runtime esto siempre funciona bien (Node
+// interopera esos módulos con normalidad); se castea cada uno al tipo
+// invocable real en vez de al revés.
 const helmetMiddleware = helmet as unknown as (
   options?: Record<string, unknown>,
 ) => RequestHandler;
+const corsMiddleware = cors as unknown as (
+  options?: Record<string, unknown>,
+) => RequestHandler;
+const cookieParserMiddleware = cookieParser as unknown as () => RequestHandler;
 const rateLimitMiddleware = rateLimit as unknown as (
   options?: Record<string, unknown>,
 ) => RequestHandler;
@@ -47,7 +52,7 @@ export function createApp(): Express {
   );
 
   app.use(
-    cors({
+    corsMiddleware({
       origin: env.CORS_ORIGIN.split(",").map((o) => o.trim()),
       credentials: true,
     }),
@@ -55,7 +60,7 @@ export function createApp(): Express {
 
   app.use(express.json({ limit: "1mb" }));
   app.use(express.urlencoded({ extended: true, limit: "1mb" }));
-  app.use(cookieParser());
+  app.use(cookieParserMiddleware());
 
   app.use(
     pinoHttp({

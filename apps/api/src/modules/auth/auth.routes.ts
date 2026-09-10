@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, type RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import { env } from "../../config/env.js";
 import { asyncHandler } from "../../middleware/error-handler.js";
@@ -6,8 +6,14 @@ import { authController } from "./auth.controller.js";
 
 export const authRouter = Router();
 
+// Ver el mismo cast documentado en apps/api/src/app.ts: el verificador de
+// tipos que usa Vercel para el build no aplica esModuleInterop.
+const rateLimitMiddleware = rateLimit as unknown as (
+  options?: Record<string, unknown>,
+) => RequestHandler;
+
 /** Límite estricto en rutas de autenticación: mitiga fuerza bruta y credential stuffing. */
-const authLimiter = rateLimit({
+const authLimiter = rateLimitMiddleware({
   windowMs: env.AUTH_RATE_LIMIT_WINDOW_MS,
   limit: env.AUTH_RATE_LIMIT_MAX,
   standardHeaders: true,
