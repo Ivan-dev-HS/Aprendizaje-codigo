@@ -1,15 +1,27 @@
-import express, { type Express } from "express";
+import express, { type Express, type RequestHandler } from "express";
 import helmet from "helmet";
 import { pinoHttp } from "pino-http";
 import { logger } from "./lib/logger.js";
 import { requireInternalToken } from "./middleware/internal-auth.js";
 import { execRouter } from "./modules/exec/exec.routes.js";
 
+// El verificador de tipos que usa Vercel para compilar la función serverless
+// no aplica `esModuleInterop` aunque esté declarado en tsconfig.json (no es
+// el `tsc` normal del proyecto, sino un paso propio de Vercel) — sin
+// interop, TS tipa el import por defecto de un módulo CJS `module.exports =
+// fn` (como helmet) como el objeto del módulo entero, no como función, y el
+// build falla con "This expression is not callable". En runtime esto
+// siempre funciona bien (Node interopera esos módulos con normalidad); se
+// castea al tipo invocable real en vez de al revés.
+const helmetMiddleware = helmet as unknown as (
+  options?: Record<string, unknown>,
+) => RequestHandler;
+
 export function createApp(): Express {
   const app = express();
   app.disable("x-powered-by");
 
-  app.use(helmet());
+  app.use(helmetMiddleware());
   app.use(express.json({ limit: "256kb" }));
   app.use(pinoHttp({ logger, autoLogging: { ignore: (req) => req.url === "/health" } }));
 

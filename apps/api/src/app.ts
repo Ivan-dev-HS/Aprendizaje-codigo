@@ -1,4 +1,4 @@
-import express, { type Express } from "express";
+import express, { type Express, type RequestHandler } from "express";
 import helmet from "helmet";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -9,6 +9,21 @@ import { logger } from "./lib/logger.js";
 import { apiRouter } from "./routes/index.js";
 import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
 
+// El verificador de tipos que usa Vercel para compilar la función serverless
+// no aplica `esModuleInterop` aunque esté declarado en tsconfig.json (no es
+// el `tsc` normal del proyecto, sino un paso propio de Vercel) — sin
+// interop, TS tipa el import por defecto de un módulo CJS `module.exports =
+// fn` (como helmet o express-rate-limit) como el objeto del módulo entero,
+// no como función, y el build falla con "This expression is not callable".
+// En runtime esto siempre funciona bien (Node interopera esos módulos con
+// normalidad); se castea al tipo invocable real en vez de al revés.
+const helmetMiddleware = helmet as unknown as (
+  options?: Record<string, unknown>,
+) => RequestHandler;
+const rateLimitMiddleware = rateLimit as unknown as (
+  options?: Record<string, unknown>,
+) => RequestHandler;
+
 export function createApp(): Express {
   const app = express();
 
@@ -16,7 +31,7 @@ export function createApp(): Express {
   app.set("trust proxy", 1);
 
   app.use(
-    helmet({
+    helmetMiddleware({
       contentSecurityPolicy: {
         directives: {
           defaultSrc: ["'self'"],
@@ -49,7 +64,7 @@ export function createApp(): Express {
     }),
   );
 
-  const generalLimiter = rateLimit({
+  const generalLimiter = rateLimitMiddleware({
     windowMs: env.RATE_LIMIT_WINDOW_MS,
     limit: env.RATE_LIMIT_MAX,
     standardHeaders: true,
