@@ -75,11 +75,15 @@ Diferencias respecto al despliegue con Docker Compose que exige este modelo:
    comentario en ese archivo. Funciona igual en local (Docker/dev) y en
    Vercel, sin build step adicional.
 3. **Conexión a Postgres vía el _connection pooler_ de Supabase**
-   (`aws-0-<region>.pooler.supabase.com:6543`, con `?pgbouncer=true`), no la
+   (`aws-<N>-<region>.pooler.supabase.com:6543`, con `?pgbouncer=true`), no la
    conexión directa (`db.<ref>.supabase.co:5432`) — las funciones serverless
    abren muchas conexiones cortas y el pooler está pensado exactamente para
    eso; la conexión directa además solo resuelve por IPv6 en proyectos nuevos
-   de Supabase.
+   de Supabase. El índice `<N>` del nodo del pooler compartido (`aws-0-`,
+   `aws-1-`, ...) lo asigna Supabase por proyecto y **no se puede asumir**
+   (usar uno equivocado da el mismo error engañoso que una contraseña mala:
+   "tenant/user not found") — hay que copiarlo tal cual de Project Settings →
+   Data API/Database → Connect → pestaña "Transaction pooler".
 4. **Migraciones y seed**: como no hay una máquina persistente corriendo
    `prisma migrate deploy`, se aplican una vez de forma manual contra
    Supabase (vía su SQL editor/API, o `prisma migrate deploy` apuntando a la
