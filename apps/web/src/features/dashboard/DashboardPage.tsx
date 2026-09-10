@@ -1,3 +1,4 @@
+import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Card } from "@codeforge/ui";
@@ -32,11 +33,116 @@ const ACTIVITY_LABELS: Record<string, { icon: string; label: string }> = {
   skill_mastered: { icon: "⭐", label: "Dominaste una skill" },
 };
 
+/** Franjas de color reutilizadas por las tarjetas "HUD" del dashboard. */
+const STAT_THEMES = {
+  indigo: {
+    card: "border-indigo-200 bg-gradient-to-br from-indigo-50 to-violet-100 dark:border-indigo-900 dark:from-indigo-950/40 dark:to-violet-900/20",
+    badge: "bg-gradient-to-br from-indigo-400 to-violet-500 text-white",
+    bar: "bg-gradient-to-r from-indigo-400 to-violet-500",
+  },
+  orange: {
+    card: "border-orange-200 bg-gradient-to-br from-orange-50 to-red-100 dark:border-orange-900 dark:from-orange-950/40 dark:to-red-900/20",
+    badge: "bg-gradient-to-br from-orange-400 to-red-500 text-white",
+    bar: "bg-gradient-to-r from-orange-400 to-red-500",
+  },
+  emerald: {
+    card: "border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-100 dark:border-emerald-900 dark:from-emerald-950/40 dark:to-teal-900/20",
+    badge: "bg-gradient-to-br from-emerald-400 to-teal-500 text-white",
+    bar: "bg-gradient-to-r from-emerald-400 to-teal-500",
+  },
+  amber: {
+    card: "border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/20",
+    badge: "bg-gradient-to-br from-amber-300 to-yellow-500 text-white",
+    bar: "bg-gradient-to-r from-amber-400 to-yellow-500",
+  },
+  purple: {
+    card: "border-purple-200 bg-purple-50 dark:border-purple-900 dark:bg-purple-950/20",
+    badge: "bg-gradient-to-br from-purple-400 to-fuchsia-500 text-white",
+    bar: "bg-gradient-to-r from-purple-400 to-fuchsia-500",
+  },
+  teal: {
+    card: "border-teal-200 bg-teal-50 dark:border-teal-900 dark:bg-teal-950/20",
+    badge: "bg-gradient-to-br from-teal-400 to-cyan-500 text-white",
+    bar: "bg-gradient-to-r from-teal-400 to-cyan-500",
+  },
+  rose: {
+    card: "border-rose-200 bg-rose-50 dark:border-rose-900 dark:bg-rose-950/20",
+    badge: "bg-gradient-to-br from-rose-400 to-pink-500 text-white",
+    bar: "bg-gradient-to-r from-rose-400 to-pink-500",
+  },
+} as const;
+
 function mascotGreeting(streakDays: number, name: string): string {
   if (streakDays === 0) return `Hola, ${name}. ¡Vamos a empezar el día con algo nuevo!`;
   if (streakDays === 1) return `¡Bien, ${name}! Llevas 1 día de racha. Sigue así hoy.`;
   if (streakDays < 7) return `¡${streakDays} días de racha, ${name}! No la rompas hoy 🔥`;
   return `¡${streakDays} días seguidos, ${name}! Eres imparable 🔥`;
+}
+
+/**
+ * Cuenta desde 0 hasta `target` en el primer render (efecto "marcador de
+ * juego"). Se salta la animación con `prefers-reduced-motion` — la regla
+ * global de index.css ya frena CSS, pero este contador usa
+ * requestAnimationFrame, así que se comprueba aparte.
+ */
+function useCountUp(target: number, durationMs = 700): number {
+  const [value, setValue] = useState(0);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setValue(target);
+      return;
+    }
+    let frame: number;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const progress = Math.min((now - start) / durationMs, 1);
+      const eased = 1 - (1 - progress) ** 3;
+      setValue(Math.round(target * eased));
+      if (progress < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [target, durationMs]);
+
+  return value;
+}
+
+function StatCard({
+  theme,
+  icon,
+  label,
+  value,
+  delayMs,
+  children,
+}: {
+  theme: keyof typeof STAT_THEMES;
+  icon: ReactNode;
+  label: string;
+  value: number;
+  delayMs: number;
+  children?: ReactNode;
+}) {
+  const shown = useCountUp(value);
+  const t = STAT_THEMES[theme];
+  return (
+    <Card
+      className={`hover-lift animate-pop-in ${t.card}`}
+      style={{ animationDelay: `${delayMs}ms` }}
+    >
+      <div className="flex items-center gap-3">
+        <span
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-lg shadow-sm ${t.badge}`}
+          aria-hidden="true"
+        >
+          {icon}
+        </span>
+        <p className="text-sm font-medium text-slate-600 dark:text-slate-300">{label}</p>
+      </div>
+      <p className="mt-3 text-3xl font-extrabold tabular-nums">{shown}</p>
+      {children}
+    </Card>
+  );
 }
 
 export function DashboardPage() {
@@ -95,55 +201,76 @@ export function DashboardPage() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
-          <Card>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Nivel</p>
-            <p className="text-3xl font-bold">{summary?.level ?? user.profile.level}</p>
+          <StatCard
+            theme="indigo"
+            icon="🎯"
+            label="Nivel"
+            value={summary?.level ?? user.profile.level}
+            delayMs={0}
+          >
             {summary && (
-              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                <div
-                  className="bg-brand-500 h-full rounded-full transition-all"
-                  style={{ width: `${xpProgress}%` }}
-                />
-              </div>
+              <>
+                <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-white/60 dark:bg-slate-950/40">
+                  <div
+                    className={`h-full rounded-full ${STAT_THEMES.indigo.bar} transition-[width] duration-500 ease-out`}
+                    style={{ width: `${xpProgress}%` }}
+                  />
+                </div>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  {summary.xpIntoCurrentLevel}/{summary.xpPerLevel} XP para el siguiente
+                  nivel
+                </p>
+              </>
             )}
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              {summary?.xpIntoCurrentLevel ?? 0}/{summary?.xpPerLevel ?? 100} XP para el
-              siguiente nivel
-            </p>
-          </Card>
-          <Card>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Racha</p>
-            <p className="text-3xl font-bold">
+          </StatCard>
+
+          <StatCard
+            theme="orange"
+            icon={
               <span
                 className={
                   (summary?.streakDays ?? 0) > 0 ? "animate-flame inline-block" : ""
                 }
               >
                 🔥
-              </span>{" "}
-              {summary?.streakDays ?? user.profile.streakDays} días
-            </p>
-          </Card>
-          <Card>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              Readiness Score
-              <span title="Indicador interno de preparación, no una garantía de empleabilidad.">
-                {" "}
-                ⓘ
               </span>
+            }
+            label="Racha"
+            value={summary?.streakDays ?? user.profile.streakDays}
+            delayMs={80}
+          >
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              {(summary?.streakDays ?? 0) > 0
+                ? "días seguidos — ¡no la rompas hoy!"
+                : "días seguidos"}
             </p>
-            <p className="text-3xl font-bold">{summary?.readiness.overall ?? 0}/100</p>
-          </Card>
+          </StatCard>
+
+          <StatCard
+            theme="emerald"
+            icon="🧭"
+            label="Readiness Score"
+            value={summary?.readiness.overall ?? 0}
+            delayMs={160}
+          >
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              de 100 · indicador interno, no una garantía de empleabilidad
+            </p>
+          </StatCard>
         </div>
 
         {dailyMissions.length > 0 && (
-          <Card className="mt-6">
+          <Card className="animate-pop-in mt-6" style={{ animationDelay: "220ms" }}>
             <p className="mb-3 text-sm font-semibold text-slate-500 dark:text-slate-400">
-              META DIARIA
+              🎯 META DIARIA
             </p>
             <div className="space-y-3">
-              {dailyMissions.map((m) => (
-                <div key={m.id}>
+              {dailyMissions.map((m, i) => (
+                <div
+                  key={m.id}
+                  className="animate-pop-in"
+                  style={{ animationDelay: `${260 + i * 60}ms` }}
+                >
                   <div className="mb-1 flex items-center justify-between text-sm">
                     <span className={m.isCompleted ? "line-through opacity-60" : ""}>
                       {m.isCompleted ? "✅ " : ""}
@@ -153,9 +280,9 @@ export function DashboardPage() {
                       {m.progress}/{m.target}
                     </span>
                   </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                  <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                     <div
-                      className={`h-full rounded-full transition-all ${m.isCompleted ? "bg-emerald-500" : "bg-brand-500"}`}
+                      className={`h-full rounded-full transition-[width] duration-500 ease-out ${m.isCompleted ? "bg-gradient-to-r from-emerald-400 to-teal-500" : STAT_THEMES.indigo.bar}`}
                       style={{ width: `${Math.round((m.progress / m.target) * 100)}%` }}
                     />
                   </div>
@@ -191,10 +318,18 @@ export function DashboardPage() {
         </Card>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <Card>
-            <p className="mb-2 text-sm font-semibold text-slate-500 dark:text-slate-400">
-              SKILLS A REFORZAR
-            </p>
+          <Card className={`hover-lift ${STAT_THEMES.amber.card}`}>
+            <div className="mb-2 flex items-center gap-2">
+              <span
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm ${STAT_THEMES.amber.badge}`}
+                aria-hidden="true"
+              >
+                ⚡
+              </span>
+              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+                SKILLS A REFORZAR
+              </p>
+            </div>
             {weakSkills.length === 0 ? (
               <p className="text-sm text-slate-500 dark:text-slate-400">
                 Nada débil por ahora — ¡buen trabajo!
@@ -213,10 +348,18 @@ export function DashboardPage() {
             )}
           </Card>
 
-          <Card>
-            <p className="mb-2 text-sm font-semibold text-slate-500 dark:text-slate-400">
-              PROYECTO ACTUAL
-            </p>
+          <Card className={`hover-lift ${STAT_THEMES.purple.card}`}>
+            <div className="mb-2 flex items-center gap-2">
+              <span
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm ${STAT_THEMES.purple.badge}`}
+                aria-hidden="true"
+              >
+                🏗️
+              </span>
+              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+                PROYECTO ACTUAL
+              </p>
+            </div>
             {currentProject ? (
               <>
                 <p className="mb-2 font-medium">{currentProject.title}</p>
@@ -240,10 +383,18 @@ export function DashboardPage() {
             )}
           </Card>
 
-          <Card>
-            <p className="mb-2 text-sm font-semibold text-slate-500 dark:text-slate-400">
-              NEXORA TECH
-            </p>
+          <Card className={`hover-lift ${STAT_THEMES.teal.card}`}>
+            <div className="mb-2 flex items-center gap-2">
+              <span
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm ${STAT_THEMES.teal.badge}`}
+                aria-hidden="true"
+              >
+                🏢
+              </span>
+              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+                NEXORA TECH
+              </p>
+            </div>
             {sprintQuery.data ? (
               <>
                 <p className="mb-2 text-sm">
@@ -262,10 +413,18 @@ export function DashboardPage() {
             )}
           </Card>
 
-          <Card>
-            <p className="mb-2 text-sm font-semibold text-slate-500 dark:text-slate-400">
-              PREPARACIÓN DE ENTREVISTAS
-            </p>
+          <Card className={`hover-lift ${STAT_THEMES.rose.card}`}>
+            <div className="mb-2 flex items-center gap-2">
+              <span
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm ${STAT_THEMES.rose.badge}`}
+                aria-hidden="true"
+              >
+                🎙️
+              </span>
+              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+                PREPARACIÓN DE ENTREVISTAS
+              </p>
+            </div>
             {bestInterview?.scores ? (
               <>
                 <p className="mb-2 text-sm">
@@ -294,7 +453,7 @@ export function DashboardPage() {
           <Card className="mt-6">
             <div className="mb-3 flex items-center justify-between">
               <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
-                LOGROS RECIENTES
+                🏆 LOGROS RECIENTES
               </p>
               <Link
                 to="/achievements"
@@ -308,10 +467,11 @@ export function DashboardPage() {
                 .filter((a) => a.isUnlocked)
                 .sort((a, b) => (b.unlockedAt ?? "").localeCompare(a.unlockedAt ?? ""))
                 .slice(0, 5)
-                .map((a) => (
+                .map((a, i) => (
                   <span
                     key={a.id}
-                    className="text-3xl"
+                    className="hover-lift animate-pop-in flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-yellow-500 text-3xl shadow-sm"
+                    style={{ animationDelay: `${i * 60}ms` }}
                     title={a.title}
                     aria-label={a.title}
                   >
