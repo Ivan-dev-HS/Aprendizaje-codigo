@@ -35,8 +35,18 @@ servidor es quien decide.
   usuario que se deba renderizar sin escape — p.ej. preview del HTML/CSS Playground —
   se aísla en un `<iframe sandbox>` sin `allow-same-origin`, nunca con `dangerouslySetInnerHTML`
   directo sobre el DOM de la app).
-- Cabecera custom (`X-Requested-With`) + `SameSite` como mitigación adicional de CSRF
-  en mutaciones basadas en cookie.
+- **CSRF**: no se usa una librería/token CSRF dedicado porque el diseño de auth ya lo
+  evita por construcción. Todas las mutaciones de negocio (`PATCH /users/me`,
+  `POST /tickets`, `PATCH /admin/*`, etc.) exigen un access token JWT en la cabecera
+  `Authorization: Bearer …`, leído del cliente desde memoria (nunca de una cookie) — un
+  sitio de terceros no puede hacer que el navegador adjunte esa cabecera "a ciegas"
+  como sí ocurre con las cookies, así que una petición forjada cross-site llega sin
+  credenciales válidas. Los dos únicos endpoints autenticados por cookie
+  (`POST /auth/refresh`, `POST /auth/logout`) solo rotan/revocan la sesión de quien
+  hace la llamada — no mutan datos de usuario — y están protegidos por
+  `SameSite=Lax` (bloquea el envío de la cookie en un POST cross-site) más la
+  allowlist de `CORS_ORIGIN` (un origen no autorizado no puede leer la respuesta
+  aunque lograra disparar la petición).
 
 ## Ejecución de código (sección 16/101 de SPEC.md)
 

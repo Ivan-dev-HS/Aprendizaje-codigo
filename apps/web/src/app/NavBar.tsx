@@ -82,9 +82,20 @@ export function NavBar() {
             </span>
           )}
           <NotificationsBell />
-          <Button variant="ghost" size="sm" onClick={toggleTheme}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleTheme}
+            aria-label={theme === "light" ? "Activar modo oscuro" : "Activar modo claro"}
+          >
             {theme === "light" ? "🌙" : "☀️"}
           </Button>
+          <Link
+            to="/settings"
+            className="shrink-0 text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+          >
+            Ajustes
+          </Link>
           <Button variant="secondary" size="sm" onClick={logout}>
             Cerrar sesión
           </Button>

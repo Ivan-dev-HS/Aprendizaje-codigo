@@ -30,6 +30,11 @@ export const lessonsService = {
 
     if (userId) {
       await assertUnlocked(lesson, userId);
+      const existingProgress = await lessonsRepository.findProgress(userId, lesson.id);
+      if (!existingProgress) {
+        await lessonsRepository.startProgress(userId, lesson.id);
+        await recordProgressEvent(userId, "lesson_started", { lessonId: lesson.id });
+      }
     }
 
     const completed = userId

@@ -178,6 +178,9 @@ export const exercisesService = {
 
     const skillUpdate = await updateMasteryOnAttempt(userId, exercise.skillId, isCorrect);
 
+    if (attemptNumber === 1) {
+      await recordProgressEvent(userId, "exercise_started", { exerciseId });
+    }
     await recordProgressEvent(
       userId,
       isCorrect ? "exercise_completed" : "exercise_failed",

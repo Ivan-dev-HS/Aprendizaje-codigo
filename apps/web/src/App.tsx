@@ -32,6 +32,7 @@ import { InterviewsPage } from "./features/interviews/InterviewsPage";
 import { InterviewSimulationPage } from "./features/interviews/InterviewSimulationPage";
 import { InterviewAttemptDetailPage } from "./features/interviews/InterviewAttemptDetailPage";
 import { AchievementsPage } from "./features/gamification/AchievementsPage";
+import { SettingsPage } from "./features/settings/SettingsPage";
 import { AdminHomePage } from "./features/admin/AdminHomePage";
 import { AdminAnalyticsPage } from "./features/admin/AdminAnalyticsPage";
 import { AdminUsersPage } from "./features/admin/AdminUsersPage";
@@ -134,6 +135,7 @@ export function App() {
         />
         <Route path="/interviews/:slug" element={<InterviewSimulationPage />} />
         <Route path="/achievements" element={<AchievementsPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
       </Route>
 
       <Route element={<RequireAdmin />}>

@@ -1,8 +1,10 @@
 import { prisma } from "@codeforge/database";
+import { recordProgressEvent } from "../gamification/xp.service.js";
 
 const CONSECUTIVE_FAILURES_FOR_WEAK = 3; // sección 70 de SPEC.md
 const MASTERY_GAIN_ON_SUCCESS = 5;
 const MASTERY_LOSS_ON_FAILURE = 2;
+const MASTERY_THRESHOLD_FOR_MASTERED = 90;
 
 export interface MasteryUpdateResult {
   masteryScore: number;
@@ -46,6 +48,13 @@ export async function updateMasteryOnAttempt(
       lastPracticedAt: new Date(),
     },
   });
+
+  if (
+    currentScore < MASTERY_THRESHOLD_FOR_MASTERED &&
+    masteryScore >= MASTERY_THRESHOLD_FOR_MASTERED
+  ) {
+    await recordProgressEvent(userId, "skill_mastered", { skillId, masteryScore });
+  }
 
   return { masteryScore, isWeak };
 }

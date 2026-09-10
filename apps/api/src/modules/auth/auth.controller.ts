@@ -8,7 +8,7 @@ import {
 import { env } from "../../config/env.js";
 import { authService } from "./auth.service.js";
 
-const REFRESH_COOKIE_NAME = "refreshToken";
+export const REFRESH_COOKIE_NAME = "refreshToken";
 const REFRESH_COOKIE_PATH = "/api/v1/auth";
 
 function setRefreshCookie(res: Response, token: string, expiresAt: Date) {
@@ -22,7 +22,7 @@ function setRefreshCookie(res: Response, token: string, expiresAt: Date) {
   });
 }
 
-function clearRefreshCookie(res: Response) {
+export function clearRefreshCookie(res: Response) {
   res.clearCookie(REFRESH_COOKIE_NAME, {
     httpOnly: true,
     secure: env.COOKIE_SECURE,

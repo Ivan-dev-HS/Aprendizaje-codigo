@@ -16,6 +16,20 @@ export const lessonsRepository = {
     });
   },
 
+  findProgress(userId: string, lessonId: string) {
+    return prisma.lessonProgress.findUnique({
+      where: { userId_lessonId: { userId, lessonId } },
+    });
+  },
+
+  startProgress(userId: string, lessonId: string) {
+    return prisma.lessonProgress.upsert({
+      where: { userId_lessonId: { userId, lessonId } },
+      update: {},
+      create: { userId, lessonId },
+    });
+  },
+
   upsertProgress(userId: string, lessonId: string) {
     return prisma.lessonProgress.upsert({
       where: { userId_lessonId: { userId, lessonId } },

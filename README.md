@@ -86,7 +86,7 @@ actual:
 - [x] **Fase 8** — Entrevistas: banco de 24 preguntas reales en 6 plantillas cronometradas (Technical/Behavioral/Frontend/Backend/Full Stack/IT Support), puntuación heurística Technical/Problem Solving/Communication/Confidence/Overall (basada en reglas, no IA).
 - [x] **Fase 9** — Gamificación (22 logros, 6 misiones diarias/semanales), Dashboard (readiness score, meta diaria, actividad reciente), notificaciones y búsqueda global, con un toque "estilo Duolingo" (racha animada, celebraciones de nivel/logro, mascota).
 - [x] **Fase 10** — Panel de administración (`/admin`, protegido por rol ADMIN): CRUD real para las 9 entidades de la sección 46 (cursos, módulos, lecciones, ejercicios, proyectos, skills, logros, preguntas de entrevista, tickets), gestión de roles de usuario, analítica agregada, audit log y feature flags.
-- [ ] Fase 11 — Endurecimiento final (checklist SPEC.md §111).
+- [x] **Fase 11** — Endurecimiento final: 4 huecos reales de analítica corregidos, arquitectura-lista para IA (`AiProvider` mock, sin conectar a ninguna ruta), borrado de cuenta con reasignación a cuenta fantasma + página de Ajustes, documentación de seguridad corregida (CSRF), `aria-label` en el toggle de tema, decisiones de alcance explícitas (sin i18n ni PWA).
 
 Ver `docs/CONTENT_BACKLOG.md` para el estado del contenido educativo por curso.
 

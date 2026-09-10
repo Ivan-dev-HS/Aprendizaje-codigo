@@ -78,11 +78,16 @@ export const ticketsService = {
         );
       }
       const becomingDone = input.status === "DONE" && t.status !== "DONE";
+      const becomingInProgress =
+        input.status === "IN_PROGRESS" && t.status !== "IN_PROGRESS";
       await ticketsRepository.updateStatus(
         id,
         input.status,
         becomingDone ? TICKET_XP_BY_PRIORITY[t.priority] : undefined,
       );
+      if (becomingInProgress) {
+        await recordProgressEvent(userId, "ticket_started", { ticketId: id });
+      }
       if (becomingDone) {
         const xpResult = await awardXpAndCheckProgress(
           userId,

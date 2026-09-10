@@ -8,3 +8,4 @@ export const usersRouter = Router();
 usersRouter.use(requireAuth);
 usersRouter.get("/me", asyncHandler(usersController.me));
 usersRouter.patch("/me", asyncHandler(usersController.updateMe));
+usersRouter.delete("/me", asyncHandler(usersController.deleteMe));

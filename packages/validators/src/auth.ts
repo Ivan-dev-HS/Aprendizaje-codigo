@@ -52,6 +52,11 @@ export const updateProfileSchema = z.object({
 });
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 
+export const deleteAccountSchema = z.object({
+  password: z.string().min(1, "Introduce tu contraseña para confirmar."),
+});
+export type DeleteAccountInput = z.infer<typeof deleteAccountSchema>;
+
 export const goalEnum = z.enum([
   "FROM_SCRATCH",
   "FRONTEND",
