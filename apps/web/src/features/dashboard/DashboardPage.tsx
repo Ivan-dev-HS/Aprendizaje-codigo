@@ -33,42 +33,53 @@ const ACTIVITY_LABELS: Record<string, { icon: string; label: string }> = {
   skill_mastered: { icon: "⭐", label: "Dominaste una skill" },
 };
 
-/** Franjas de color reutilizadas por las tarjetas "HUD" del dashboard. */
+/**
+ * Paleta "ficha de juego" por tarjeta: fondo saturado + borde grueso a
+ * juego + color de la sombra sólida (--game-shadow, ver .game-panel /
+ * .game-btn en index.css) con su variante para modo oscuro.
+ */
 const STAT_THEMES = {
   indigo: {
-    card: "border-indigo-200 bg-gradient-to-br from-indigo-50 to-violet-100 dark:border-indigo-900 dark:from-indigo-950/40 dark:to-violet-900/20",
+    card: "border-indigo-300 bg-gradient-to-br from-indigo-100 to-violet-200 dark:border-indigo-800 dark:from-indigo-950/50 dark:to-violet-900/30",
     badge: "bg-gradient-to-br from-indigo-400 to-violet-500 text-white",
     bar: "bg-gradient-to-r from-indigo-400 to-violet-500",
+    shadowVar: "[--game-shadow:#a5b4fc] dark:[--game-shadow:#4338ca]",
   },
   orange: {
-    card: "border-orange-200 bg-gradient-to-br from-orange-50 to-red-100 dark:border-orange-900 dark:from-orange-950/40 dark:to-red-900/20",
+    card: "border-orange-300 bg-gradient-to-br from-orange-100 to-red-200 dark:border-orange-800 dark:from-orange-950/50 dark:to-red-900/30",
     badge: "bg-gradient-to-br from-orange-400 to-red-500 text-white",
     bar: "bg-gradient-to-r from-orange-400 to-red-500",
+    shadowVar: "[--game-shadow:#fdba74] dark:[--game-shadow:#c2410c]",
   },
   emerald: {
-    card: "border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-100 dark:border-emerald-900 dark:from-emerald-950/40 dark:to-teal-900/20",
+    card: "border-emerald-300 bg-gradient-to-br from-emerald-100 to-teal-200 dark:border-emerald-800 dark:from-emerald-950/50 dark:to-teal-900/30",
     badge: "bg-gradient-to-br from-emerald-400 to-teal-500 text-white",
     bar: "bg-gradient-to-r from-emerald-400 to-teal-500",
+    shadowVar: "[--game-shadow:#6ee7b7] dark:[--game-shadow:#047857]",
   },
   amber: {
-    card: "border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/20",
+    card: "border-amber-300 bg-amber-100 dark:border-amber-800 dark:bg-amber-950/30",
     badge: "bg-gradient-to-br from-amber-300 to-yellow-500 text-white",
     bar: "bg-gradient-to-r from-amber-400 to-yellow-500",
+    shadowVar: "[--game-shadow:#fcd34d] dark:[--game-shadow:#b45309]",
   },
   purple: {
-    card: "border-purple-200 bg-purple-50 dark:border-purple-900 dark:bg-purple-950/20",
+    card: "border-purple-300 bg-purple-100 dark:border-purple-800 dark:bg-purple-950/30",
     badge: "bg-gradient-to-br from-purple-400 to-fuchsia-500 text-white",
     bar: "bg-gradient-to-r from-purple-400 to-fuchsia-500",
+    shadowVar: "[--game-shadow:#d8b4fe] dark:[--game-shadow:#7e22ce]",
   },
   teal: {
-    card: "border-teal-200 bg-teal-50 dark:border-teal-900 dark:bg-teal-950/20",
+    card: "border-teal-300 bg-teal-100 dark:border-teal-800 dark:bg-teal-950/30",
     badge: "bg-gradient-to-br from-teal-400 to-cyan-500 text-white",
     bar: "bg-gradient-to-r from-teal-400 to-cyan-500",
+    shadowVar: "[--game-shadow:#5eead4] dark:[--game-shadow:#0f766e]",
   },
   rose: {
-    card: "border-rose-200 bg-rose-50 dark:border-rose-900 dark:bg-rose-950/20",
+    card: "border-rose-300 bg-rose-100 dark:border-rose-800 dark:bg-rose-950/30",
     badge: "bg-gradient-to-br from-rose-400 to-pink-500 text-white",
     bar: "bg-gradient-to-r from-rose-400 to-pink-500",
+    shadowVar: "[--game-shadow:#fda4af] dark:[--game-shadow:#be123c]",
   },
 } as const;
 
@@ -108,7 +119,7 @@ function useCountUp(target: number, durationMs = 700): number {
   return value;
 }
 
-function StatCard({
+function StatChip({
   theme,
   icon,
   label,
@@ -126,22 +137,66 @@ function StatCard({
   const shown = useCountUp(value);
   const t = STAT_THEMES[theme];
   return (
-    <Card
-      className={`hover-lift animate-pop-in ${t.card}`}
+    <div
+      className={`game-panel animate-pop-in rounded-3xl border-2 p-5 ${t.card} ${t.shadowVar}`}
       style={{ animationDelay: `${delayMs}ms` }}
     >
       <div className="flex items-center gap-3">
         <span
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-lg shadow-sm ${t.badge}`}
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-xl ${t.badge}`}
           aria-hidden="true"
         >
           {icon}
         </span>
-        <p className="text-sm font-medium text-slate-600 dark:text-slate-300">{label}</p>
+        <p className="font-display text-sm font-semibold text-slate-700 dark:text-slate-200">
+          {label}
+        </p>
       </div>
-      <p className="mt-3 text-3xl font-extrabold tabular-nums">{shown}</p>
+      <p className="font-display mt-3 text-4xl font-extrabold tabular-nums">{shown}</p>
       {children}
-    </Card>
+    </div>
+  );
+}
+
+/** Ficha clicable estilo "carta de juego" — navega a `to` con look de botón. */
+function QuickLinkTile({
+  theme,
+  icon,
+  label,
+  to,
+  children,
+}: {
+  theme: keyof typeof STAT_THEMES;
+  icon: ReactNode;
+  label: string;
+  to?: string;
+  children: ReactNode;
+}) {
+  const t = STAT_THEMES[theme];
+  const content = (
+    <div
+      className={`h-full rounded-3xl border-2 p-5 ${t.card} ${t.shadowVar} ${to ? "game-btn cursor-pointer" : "game-panel"}`}
+    >
+      <div className="mb-2 flex items-center gap-2">
+        <span
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm ${t.badge}`}
+          aria-hidden="true"
+        >
+          {icon}
+        </span>
+        <p className="font-display text-sm font-bold tracking-wide text-slate-700 dark:text-slate-200">
+          {label}
+        </p>
+      </div>
+      {children}
+    </div>
+  );
+  return to ? (
+    <Link to={to} className="block">
+      {content}
+    </Link>
+  ) : (
+    content
   );
 }
 
@@ -191,7 +246,7 @@ export function DashboardPage() {
   const dailyMissions = summary?.missions.filter((m) => m.period === "DAILY") ?? [];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-white to-white dark:from-indigo-950/40 dark:via-slate-950 dark:to-slate-950">
       <NavBar />
       <main className="mx-auto max-w-4xl px-4 py-10">
         <div className="mb-8">
@@ -201,7 +256,7 @@ export function DashboardPage() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
-          <StatCard
+          <StatChip
             theme="indigo"
             icon="🎯"
             label="Nivel"
@@ -210,21 +265,21 @@ export function DashboardPage() {
           >
             {summary && (
               <>
-                <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-white/60 dark:bg-slate-950/40">
+                <div className="mt-3 h-3 overflow-hidden rounded-full bg-white/60 shadow-inner dark:bg-slate-950/40">
                   <div
                     className={`h-full rounded-full ${STAT_THEMES.indigo.bar} transition-[width] duration-500 ease-out`}
                     style={{ width: `${xpProgress}%` }}
                   />
                 </div>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
                   {summary.xpIntoCurrentLevel}/{summary.xpPerLevel} XP para el siguiente
                   nivel
                 </p>
               </>
             )}
-          </StatCard>
+          </StatChip>
 
-          <StatCard
+          <StatChip
             theme="orange"
             icon={
               <span
@@ -239,29 +294,32 @@ export function DashboardPage() {
             value={summary?.streakDays ?? user.profile.streakDays}
             delayMs={80}
           >
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
               {(summary?.streakDays ?? 0) > 0
                 ? "días seguidos — ¡no la rompas hoy!"
                 : "días seguidos"}
             </p>
-          </StatCard>
+          </StatChip>
 
-          <StatCard
+          <StatChip
             theme="emerald"
             icon="🧭"
             label="Readiness Score"
             value={summary?.readiness.overall ?? 0}
             delayMs={160}
           >
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
               de 100 · indicador interno, no una garantía de empleabilidad
             </p>
-          </StatCard>
+          </StatChip>
         </div>
 
         {dailyMissions.length > 0 && (
-          <Card className="animate-pop-in mt-6" style={{ animationDelay: "220ms" }}>
-            <p className="mb-3 text-sm font-semibold text-slate-500 dark:text-slate-400">
+          <div
+            className={`game-panel animate-pop-in mt-6 rounded-3xl border-2 p-5 ${STAT_THEMES.indigo.shadowVar} border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900`}
+            style={{ animationDelay: "220ms" }}
+          >
+            <p className="font-display mb-3 text-sm font-bold tracking-wide text-slate-600 dark:text-slate-300">
               🎯 META DIARIA
             </p>
             <div className="space-y-3">
@@ -280,7 +338,7 @@ export function DashboardPage() {
                       {m.progress}/{m.target}
                     </span>
                   </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                  <div className="h-2.5 overflow-hidden rounded-full bg-slate-100 shadow-inner dark:bg-slate-800">
                     <div
                       className={`h-full rounded-full transition-[width] duration-500 ease-out ${m.isCompleted ? "bg-gradient-to-r from-emerald-400 to-teal-500" : STAT_THEMES.indigo.bar}`}
                       style={{ width: `${Math.round((m.progress / m.target) * 100)}%` }}
@@ -289,12 +347,12 @@ export function DashboardPage() {
                 </div>
               ))}
             </div>
-          </Card>
+          </div>
         )}
 
         <Card className="mt-6">
           <p className="text-sm text-slate-500 dark:text-slate-400">Tu objetivo</p>
-          <p className="text-lg font-medium">
+          <p className="font-display text-lg font-semibold">
             {GOAL_LABELS[user.profile.goal] ?? user.profile.goal}
           </p>
         </Card>
@@ -307,31 +365,27 @@ export function DashboardPage() {
             <>
               <p className="mb-3 text-lg font-medium">{nextCourse.courseTitle}</p>
               <Link to={`/courses/${nextCourse.courseSlug}`}>
-                <Button>Continuar →</Button>
+                <Button className="game-btn font-display !rounded-full !px-7 !text-base [--game-shadow:theme(colors.brand.800)]">
+                  Continuar →
+                </Button>
               </Link>
             </>
           ) : (
             <Link to="/courses">
-              <Button variant="secondary">Ver mi roadmap</Button>
+              <Button
+                variant="secondary"
+                className="game-btn font-display !rounded-full !px-7 !text-base [--game-shadow:theme(colors.slate.400)] dark:[--game-shadow:theme(colors.slate.700)]"
+              >
+                Ver mi roadmap
+              </Button>
             </Link>
           )}
         </Card>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <Card className={`hover-lift ${STAT_THEMES.amber.card}`}>
-            <div className="mb-2 flex items-center gap-2">
-              <span
-                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm ${STAT_THEMES.amber.badge}`}
-                aria-hidden="true"
-              >
-                ⚡
-              </span>
-              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
-                SKILLS A REFORZAR
-              </p>
-            </div>
+          <QuickLinkTile theme="amber" icon="⚡" label="SKILLS A REFORZAR">
             {weakSkills.length === 0 ? (
-              <p className="text-sm text-slate-500 dark:text-slate-400">
+              <p className="text-sm text-slate-600 dark:text-slate-400">
                 Nada débil por ahora — ¡buen trabajo!
               </p>
             ) : (
@@ -339,120 +393,75 @@ export function DashboardPage() {
                 {weakSkills.map((s) => (
                   <li key={s.id} className="flex justify-between">
                     <span>{s.name}</span>
-                    <span className="text-amber-600 dark:text-amber-400">
+                    <span className="text-amber-700 dark:text-amber-400">
                       {s.masteryScore}/100
                     </span>
                   </li>
                 ))}
               </ul>
             )}
-          </Card>
+          </QuickLinkTile>
 
-          <Card className={`hover-lift ${STAT_THEMES.purple.card}`}>
-            <div className="mb-2 flex items-center gap-2">
-              <span
-                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm ${STAT_THEMES.purple.badge}`}
-                aria-hidden="true"
-              >
-                🏗️
-              </span>
-              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
-                PROYECTO ACTUAL
-              </p>
-            </div>
+          <QuickLinkTile
+            theme="purple"
+            icon="🏗️"
+            label="PROYECTO ACTUAL"
+            to={currentProject ? `/projects/${currentProject.slug}` : "/projects"}
+          >
             {currentProject ? (
               <>
-                <p className="mb-2 font-medium">{currentProject.title}</p>
-                <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
-                  {currentProject.completedTaskCount}/{currentProject.taskCount} tareas
+                <p className="mb-1 font-medium">{currentProject.title}</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400">
+                  {currentProject.completedTaskCount}/{currentProject.taskCount} tareas ·
+                  continuar →
                 </p>
-                <Link
-                  to={`/projects/${currentProject.slug}`}
-                  className="text-brand-600 dark:text-brand-400 text-sm hover:underline"
-                >
-                  Continuar proyecto →
-                </Link>
               </>
             ) : (
-              <Link
-                to="/projects"
-                className="text-brand-600 dark:text-brand-400 text-sm hover:underline"
-              >
+              <p className="text-sm text-slate-600 dark:text-slate-400">
                 Empezar un proyecto →
-              </Link>
-            )}
-          </Card>
-
-          <Card className={`hover-lift ${STAT_THEMES.teal.card}`}>
-            <div className="mb-2 flex items-center gap-2">
-              <span
-                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm ${STAT_THEMES.teal.badge}`}
-                aria-hidden="true"
-              >
-                🏢
-              </span>
-              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
-                NEXORA TECH
               </p>
-            </div>
+            )}
+          </QuickLinkTile>
+
+          <QuickLinkTile
+            theme="teal"
+            icon="🏢"
+            label="NEXORA TECH"
+            to={sprintQuery.data ? "/company" : undefined}
+          >
             {sprintQuery.data ? (
-              <>
-                <p className="mb-2 text-sm">
-                  {sprintQuery.data.doneTickets}/{sprintQuery.data.totalTickets} tickets
-                  completados en {sprintQuery.data.name}
-                </p>
-                <Link
-                  to="/company"
-                  className="text-brand-600 dark:text-brand-400 text-sm hover:underline"
-                >
-                  Ir al tablero →
-                </Link>
-              </>
-            ) : (
-              <p className="text-sm text-slate-500 dark:text-slate-400">Sin datos.</p>
-            )}
-          </Card>
-
-          <Card className={`hover-lift ${STAT_THEMES.rose.card}`}>
-            <div className="mb-2 flex items-center gap-2">
-              <span
-                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm ${STAT_THEMES.rose.badge}`}
-                aria-hidden="true"
-              >
-                🎙️
-              </span>
-              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
-                PREPARACIÓN DE ENTREVISTAS
+              <p className="text-sm">
+                {sprintQuery.data.doneTickets}/{sprintQuery.data.totalTickets} tickets
+                completados en {sprintQuery.data.name} · ir al tablero →
               </p>
-            </div>
-            {bestInterview?.scores ? (
-              <>
-                <p className="mb-2 text-sm">
-                  Mejor resultado: {bestInterview.scores.overallScore}/100 (
-                  {bestInterview.interviewTitle})
-                </p>
-                <Link
-                  to="/interviews"
-                  className="text-brand-600 dark:text-brand-400 text-sm hover:underline"
-                >
-                  Practicar más →
-                </Link>
-              </>
             ) : (
-              <Link
-                to="/interviews"
-                className="text-brand-600 dark:text-brand-400 text-sm hover:underline"
-              >
-                Hacer tu primera entrevista →
-              </Link>
+              <p className="text-sm text-slate-600 dark:text-slate-400">Sin datos.</p>
             )}
-          </Card>
+          </QuickLinkTile>
+
+          <QuickLinkTile
+            theme="rose"
+            icon="🎙️"
+            label="PREPARACIÓN DE ENTREVISTAS"
+            to="/interviews"
+          >
+            {bestInterview?.scores ? (
+              <p className="text-sm">
+                Mejor resultado: {bestInterview.scores.overallScore}/100 (
+                {bestInterview.interviewTitle}) · practicar más →
+              </p>
+            ) : (
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                Hacer tu primera entrevista →
+              </p>
+            )}
+          </QuickLinkTile>
         </div>
 
         {summary && summary.achievements.some((a) => a.isUnlocked) && (
           <Card className="mt-6">
             <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+              <p className="font-display text-sm font-bold tracking-wide text-slate-600 dark:text-slate-300">
                 🏆 LOGROS RECIENTES
               </p>
               <Link
@@ -462,7 +471,7 @@ export function DashboardPage() {
                 Ver todos →
               </Link>
             </div>
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-4">
               {summary.achievements
                 .filter((a) => a.isUnlocked)
                 .sort((a, b) => (b.unlockedAt ?? "").localeCompare(a.unlockedAt ?? ""))
@@ -470,7 +479,7 @@ export function DashboardPage() {
                 .map((a, i) => (
                   <span
                     key={a.id}
-                    className="hover-lift animate-pop-in flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-yellow-500 text-3xl shadow-sm"
+                    className="game-panel animate-pop-in flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-2 border-amber-400 bg-gradient-to-br from-amber-300 to-yellow-500 text-3xl [--game-shadow:#b45309]"
                     style={{ animationDelay: `${i * 60}ms` }}
                     title={a.title}
                     aria-label={a.title}

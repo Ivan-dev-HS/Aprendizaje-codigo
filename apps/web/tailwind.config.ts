@@ -23,6 +23,8 @@ export default {
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
         mono: ["JetBrains Mono", "ui-monospace", "monospace"],
+        /** Tipografía redondeada "de juego" para títulos y marcadores — ver Dashboard. */
+        display: ["'Baloo 2'", "system-ui", "sans-serif"],
       },
     },
   },
