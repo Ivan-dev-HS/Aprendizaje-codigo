@@ -11,12 +11,18 @@ import { authService } from "./auth.service.js";
 export const REFRESH_COOKIE_NAME = "refreshToken";
 const REFRESH_COOKIE_PATH = "/api/v1/auth";
 
+function cookieDomain() {
+  return env.COOKIE_DOMAIN && env.COOKIE_DOMAIN !== "localhost"
+    ? env.COOKIE_DOMAIN
+    : undefined;
+}
+
 function setRefreshCookie(res: Response, token: string, expiresAt: Date) {
   res.cookie(REFRESH_COOKIE_NAME, token, {
     httpOnly: true,
     secure: env.COOKIE_SECURE,
-    sameSite: "lax",
-    domain: env.COOKIE_DOMAIN === "localhost" ? undefined : env.COOKIE_DOMAIN,
+    sameSite: env.COOKIE_SAME_SITE,
+    domain: cookieDomain(),
     path: REFRESH_COOKIE_PATH,
     expires: expiresAt,
   });
@@ -26,8 +32,8 @@ export function clearRefreshCookie(res: Response) {
   res.clearCookie(REFRESH_COOKIE_NAME, {
     httpOnly: true,
     secure: env.COOKIE_SECURE,
-    sameSite: "lax",
-    domain: env.COOKIE_DOMAIN === "localhost" ? undefined : env.COOKIE_DOMAIN,
+    sameSite: env.COOKIE_SAME_SITE,
+    domain: cookieDomain(),
     path: REFRESH_COOKIE_PATH,
   });
 }

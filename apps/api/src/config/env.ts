@@ -18,6 +18,12 @@ const envSchema = z.object({
     .string()
     .default("false")
     .transform((v) => v === "true"),
+  // "lax" sirve en desarrollo local y en despliegues donde web/api comparten
+  // dominio. Cuando viven en dominios distintos sin un padre común (p. ej.
+  // proyectos separados en vercel.app), la cookie de refresh necesita
+  // SameSite=None (+ Secure, ya obligatorio ahí) para que el navegador la
+  // envíe en las peticiones cross-site del frontend hacia la API.
+  COOKIE_SAME_SITE: z.enum(["lax", "strict", "none"]).default("lax"),
   CORS_ORIGIN: z.string().default("http://localhost:5173"),
   EXEC_SERVICE_URL: z.string().default("http://localhost:4100"),
   EXEC_SERVICE_INTERNAL_TOKEN: z.string().default("change_me_dev_only_internal_token"),
