@@ -9,7 +9,14 @@ import { HttpError } from "../../lib/http-error.js";
  * jamás se expone al frontend.
  */
 async function callExecService<T>(path: string, body: unknown): Promise<T> {
-  let response: Response;
+  // Se deriva el tipo directamente de `fetch` en vez de nombrar `Response`
+  // aparte: el verificador de tipos que usa Vercel para el build de la
+  // función serverless no resuelve bien el `Response` global de Fetch API en
+  // este archivo (posiblemente porque el resto del proyecto usa masivamente
+  // el `Response` de Express — otro tipo, importado explícitamente en cada
+  // controller —, y su entorno de chequeo aislado no distingue ambos
+  // correctamente). Local funciona con normalidad.
+  let response: Awaited<ReturnType<typeof fetch>>;
   try {
     response = await fetch(`${env.EXEC_SERVICE_URL}${path}`, {
       method: "POST",
