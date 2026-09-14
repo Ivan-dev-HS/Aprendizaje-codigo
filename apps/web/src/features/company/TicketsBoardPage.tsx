@@ -22,6 +22,13 @@ const PRIORITY_COLORS: Record<TicketPriority, string> = {
   CRITICAL: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300",
 };
 
+const PRIORITY_BORDER: Record<TicketPriority, string> = {
+  LOW: "border-l-slate-300 dark:border-l-slate-600",
+  MEDIUM: "border-l-brand-500",
+  HIGH: "border-l-amber-500",
+  CRITICAL: "border-l-red-500",
+};
+
 export function TicketsBoardPage() {
   const sprintQuery = useQuery({
     queryKey: ["current-sprint"],
@@ -39,7 +46,7 @@ export function TicketsBoardPage() {
     <div className="min-h-screen">
       <NavBar />
       <main className="mx-auto max-w-6xl px-4 py-10">
-        <h1 className="mb-1 text-2xl font-bold">Nexora Tech</h1>
+        <h1 className="font-display mb-1 text-2xl font-bold">🏢 Nexora Tech</h1>
         {sprint && (
           <>
             <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -56,13 +63,15 @@ export function TicketsBoardPage() {
             const columnTickets = tickets.filter((t) => t.status === col.status);
             return (
               <div key={col.status} className="w-64 shrink-0">
-                <h2 className="mb-2 text-sm font-semibold text-slate-500 dark:text-slate-400">
+                <h2 className="font-display mb-2 text-sm font-bold text-slate-600 dark:text-slate-400">
                   {col.label} ({columnTickets.length})
                 </h2>
                 <div className="space-y-2" data-testid={`column-${col.status}`}>
                   {columnTickets.map((t) => (
                     <Link key={t.id} to={`/company/tickets/${t.id}`}>
-                      <Card className="hover:border-brand-400 dark:hover:border-brand-600 p-3 transition">
+                      <Card
+                        className={`hover-lift border-l-4 p-3 ${PRIORITY_BORDER[t.priority]}`}
+                      >
                         <p className="text-xs text-slate-500 dark:text-slate-400">
                           {t.code}
                         </p>

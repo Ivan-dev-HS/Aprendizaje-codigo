@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import type { CaseKind } from "@codeforge/types";
-import { Card } from "@codeforge/ui";
 import { NavBar } from "../../app/NavBar";
+import { GAME_THEMES, type GameThemeName } from "../../app/game-theme";
 import { casesApi } from "./cases.api";
 
 const KIND_TABS: { id: CaseKind | "ALL"; label: string }[] = [
@@ -20,6 +20,15 @@ const DIFFICULTY_LABELS: Record<string, string> = {
   HARD: "Difícil",
 };
 
+const THEME_CYCLE: GameThemeName[] = [
+  "teal",
+  "orange",
+  "purple",
+  "emerald",
+  "rose",
+  "indigo",
+];
+
 export function CasesPage() {
   const [kind, setKind] = useState<CaseKind | "ALL">("ALL");
 
@@ -33,21 +42,21 @@ export function CasesPage() {
     <div className="min-h-screen">
       <NavBar />
       <main className="mx-auto max-w-5xl px-4 py-10">
-        <h1 className="mb-2 text-2xl font-bold">Casos reales</h1>
+        <h1 className="font-display mb-2 text-2xl font-bold">🔍 Casos reales</h1>
         <p className="mb-6 text-sm text-slate-600 dark:text-slate-400">
           Diagnostica problemas reales de debugging, soporte técnico, redes e incidentes
           de producción — como pasaría en un trabajo de verdad.
         </p>
 
-        <div className="mb-6 flex flex-wrap gap-1">
+        <div className="mb-6 flex flex-wrap gap-2">
           {KIND_TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setKind(tab.id)}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
+              className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
                 kind === tab.id
-                  ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
-                  : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                  ? "font-display bg-brand-600 text-white"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
               }`}
             >
               {tab.label}
@@ -58,27 +67,33 @@ export function CasesPage() {
         {casesQuery.isLoading && <p className="text-sm">Cargando casos…</p>}
 
         <div className="grid gap-4 sm:grid-cols-2">
-          {casesQuery.data?.items.map((c) => (
-            <Link key={c.id} to={`/cases/${c.id}`}>
-              <Card className="hover:border-brand-400 dark:hover:border-brand-600 h-full transition">
-                <div className="mb-1 flex items-center justify-between">
-                  <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                    {c.domain}
-                    {c.severity && ` · ${c.severity}`}
-                  </span>
-                  {c.isCompleted && (
-                    <span title="Completado" aria-label="Completado">
-                      ✅
+          {casesQuery.data?.items.map((c, i) => {
+            const t = GAME_THEMES[THEME_CYCLE[i % THEME_CYCLE.length] ?? "indigo"];
+            return (
+              <Link key={c.id} to={`/cases/${c.id}`} className="block h-full">
+                <div
+                  className={`game-btn animate-pop-in h-full cursor-pointer rounded-3xl border-2 p-5 ${t.card} ${t.shadowVar}`}
+                  style={{ animationDelay: `${i * 50}ms` }}
+                >
+                  <div className="mb-1 flex items-center justify-between">
+                    <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                      {c.domain}
+                      {c.severity && ` · ${c.severity}`}
                     </span>
-                  )}
+                    {c.isCompleted && (
+                      <span title="Completado" aria-label="Completado">
+                        ✅
+                      </span>
+                    )}
+                  </div>
+                  <h2 className="font-display font-bold">{c.title}</h2>
+                  <p className="mt-2 text-xs text-slate-600 dark:text-slate-400">
+                    {DIFFICULTY_LABELS[c.difficulty]} · {c.points} XP
+                  </p>
                 </div>
-                <h2 className="font-semibold">{c.title}</h2>
-                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                  {DIFFICULTY_LABELS[c.difficulty]} · {c.points} XP
-                </p>
-              </Card>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </main>
     </div>
