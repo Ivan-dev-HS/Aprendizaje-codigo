@@ -1,10 +1,11 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@codeforge/ui";
 import { useAuth } from "../features/auth/auth-context";
 import { useGamification } from "../features/gamification/gamification-context";
 import { NotificationsBell } from "../features/notifications/NotificationsBell";
 import { SearchBar } from "../features/search/SearchBar";
 import { useTheme } from "./theme-context";
+import { GAME_THEMES } from "./game-theme";
 
 const NAV_LINKS: { to: string; label: string }[] = [
   { to: "/dashboard", label: "Dashboard" },
@@ -20,37 +21,42 @@ const NAV_LINKS: { to: string; label: string }[] = [
   { to: "/achievements", label: "Logros" },
 ];
 
+function NavLink({ to, label, active }: { to: string; label: string; active: boolean }) {
+  return (
+    <Link
+      to={to}
+      className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+        active
+          ? "font-display bg-brand-600 text-white"
+          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+      }`}
+    >
+      {label}
+    </Link>
+  );
+}
+
 export function NavBar() {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { summary } = useGamification();
+  const { pathname } = useLocation();
 
   return (
     <nav className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
-        <div className="flex items-center gap-6 overflow-x-auto">
+        <div className="flex items-center gap-2 overflow-x-auto">
           <Link
             to="/dashboard"
-            className="text-brand-700 dark:text-brand-400 shrink-0 font-bold"
+            className="font-display text-brand-700 dark:text-brand-400 mr-2 shrink-0 text-lg font-bold"
           >
-            CodeForge
+            🚀 CodeForge
           </Link>
           {NAV_LINKS.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className="shrink-0 text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
-            >
-              {link.label}
-            </Link>
+            <NavLink key={link.to} {...link} active={pathname.startsWith(link.to)} />
           ))}
           {user?.role === "ADMIN" && (
-            <Link
-              to="/admin"
-              className="shrink-0 text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
-            >
-              Admin
-            </Link>
+            <NavLink to="/admin" label="Admin" active={pathname.startsWith("/admin")} />
           )}
         </div>
         <div className="flex items-center gap-3">
@@ -60,7 +66,7 @@ export function NavBar() {
           {summary && (
             <Link
               to="/dashboard"
-              className="hidden items-center gap-2 rounded-lg bg-slate-100 px-2.5 py-1 text-sm sm:flex dark:bg-slate-800"
+              className={`game-panel hidden items-center gap-2 rounded-full border-2 px-3 py-1 text-sm sm:flex ${GAME_THEMES.orange.card} ${GAME_THEMES.orange.shadowVar}`}
               title={`Racha de ${summary.streakDays} días`}
             >
               <span
@@ -69,9 +75,9 @@ export function NavBar() {
               >
                 🔥
               </span>
-              <span className="font-medium">{summary.streakDays}</span>
-              <span className="text-slate-300 dark:text-slate-600">·</span>
-              <span className="text-slate-600 dark:text-slate-400">
+              <span className="font-display font-bold">{summary.streakDays}</span>
+              <span className="text-slate-400 dark:text-slate-600">·</span>
+              <span className="text-slate-700 dark:text-slate-300">
                 Nivel {summary.level}
               </span>
             </Link>
