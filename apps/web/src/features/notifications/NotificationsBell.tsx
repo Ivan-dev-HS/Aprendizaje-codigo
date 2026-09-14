@@ -49,7 +49,7 @@ export function NotificationsBell() {
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="animate-dropdown-in absolute right-0 z-20 mt-2 w-80 rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-800 dark:bg-slate-900">
+          <div className="animate-dropdown-in fixed inset-x-4 top-16 z-20 rounded-xl border border-slate-200 bg-white shadow-lg sm:absolute sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-80 dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2 dark:border-slate-800">
               <p className="text-sm font-semibold">Notificaciones</p>
               {unreadCount > 0 && (

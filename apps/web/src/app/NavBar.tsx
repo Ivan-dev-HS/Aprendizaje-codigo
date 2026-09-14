@@ -66,8 +66,8 @@ export function NavBar() {
           {summary && (
             <Link
               to="/dashboard"
-              className={`game-panel hidden items-center gap-2 rounded-full border-2 px-3 py-1 text-sm sm:flex ${GAME_THEMES.orange.card} ${GAME_THEMES.orange.shadowVar}`}
-              title={`Racha de ${summary.streakDays} días`}
+              className={`game-panel flex items-center gap-1.5 rounded-full border-2 px-2.5 py-1 text-sm sm:gap-2 sm:px-3 ${GAME_THEMES.orange.card} ${GAME_THEMES.orange.shadowVar}`}
+              title={`Racha de ${summary.streakDays} días · Nivel ${summary.level}`}
             >
               <span
                 className={summary.streakDays > 0 ? "animate-flame" : "opacity-40"}
@@ -76,15 +76,18 @@ export function NavBar() {
                 🔥
               </span>
               <span className="font-display font-bold">{summary.streakDays}</span>
-              <span className="text-slate-400 dark:text-slate-600">·</span>
-              <span className="text-slate-700 dark:text-slate-300">
+              <span className="hidden text-slate-400 sm:inline dark:text-slate-600">
+                ·
+              </span>
+              <span className="hidden text-slate-700 sm:inline dark:text-slate-300">
                 Nivel {summary.level}
               </span>
             </Link>
           )}
           {!summary && user && (
-            <span className="hidden text-sm text-slate-600 sm:inline dark:text-slate-400">
-              Nivel {user.profile.level} · {user.profile.totalXp} XP
+            <span className="text-sm text-slate-600 dark:text-slate-400">
+              Nivel {user.profile.level}
+              <span className="hidden sm:inline"> · {user.profile.totalXp} XP</span>
             </span>
           )}
           <NotificationsBell />
