@@ -3,7 +3,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginInput } from "@codeforge/validators";
-import { Alert, Button, Card, FieldError, Input, Label } from "@codeforge/ui";
+import { Alert, Button, FieldError, Input, Label } from "@codeforge/ui";
+import { AuthLayout } from "./AuthLayout";
 import { useAuth } from "./auth-context";
 
 export function LoginPage() {
@@ -32,67 +33,69 @@ export function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-12">
-      <Card className="w-full max-w-md">
-        <h1 className="mb-1 text-2xl font-bold">Inicia sesión</h1>
-        <p className="mb-6 text-sm text-slate-600 dark:text-slate-400">
-          Continúa donde lo dejaste.
-        </p>
+    <AuthLayout>
+      <h1 className="font-display mb-1 text-2xl font-bold">🚀 Inicia sesión</h1>
+      <p className="mb-6 text-sm text-slate-600 dark:text-slate-400">
+        Continúa donde lo dejaste.
+      </p>
 
-        {serverError && (
-          <Alert variant="error" className="mb-4">
-            {serverError}
-          </Alert>
-        )}
+      {serverError && (
+        <Alert variant="error" className="mb-4">
+          {serverError}
+        </Alert>
+      )}
 
-        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              hasError={!!errors.email}
-              {...register("email")}
-            />
-            <FieldError>{errors.email?.message}</FieldError>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+        <div>
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            hasError={!!errors.email}
+            {...register("email")}
+          />
+          <FieldError>{errors.email?.message}</FieldError>
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password">Contraseña</Label>
+            <Link
+              to="/recuperar-contrasena"
+              className="text-brand-600 dark:text-brand-400 mb-1.5 text-sm hover:underline"
+            >
+              ¿La olvidaste?
+            </Link>
           </div>
+          <Input
+            id="password"
+            type="password"
+            autoComplete="current-password"
+            hasError={!!errors.password}
+            {...register("password")}
+          />
+          <FieldError>{errors.password?.message}</FieldError>
+        </div>
 
-          <div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Contraseña</Label>
-              <Link
-                to="/recuperar-contrasena"
-                className="text-brand-600 dark:text-brand-400 mb-1.5 text-sm hover:underline"
-              >
-                ¿La olvidaste?
-              </Link>
-            </div>
-            <Input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              hasError={!!errors.password}
-              {...register("password")}
-            />
-            <FieldError>{errors.password?.message}</FieldError>
-          </div>
+        <Button
+          type="submit"
+          className="game-panel font-display w-full !rounded-full [--game-shadow:theme(colors.brand.800)]"
+          isLoading={isSubmitting}
+        >
+          Iniciar sesión
+        </Button>
+      </form>
 
-          <Button type="submit" className="w-full" isLoading={isSubmitting}>
-            Iniciar sesión
-          </Button>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
-          ¿No tienes cuenta?{" "}
-          <Link
-            to="/register"
-            className="text-brand-600 dark:text-brand-400 font-medium hover:underline"
-          >
-            Regístrate
-          </Link>
-        </p>
-      </Card>
-    </main>
+      <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
+        ¿No tienes cuenta?{" "}
+        <Link
+          to="/register"
+          className="text-brand-600 dark:text-brand-400 font-medium hover:underline"
+        >
+          Regístrate
+        </Link>
+      </p>
+    </AuthLayout>
   );
 }

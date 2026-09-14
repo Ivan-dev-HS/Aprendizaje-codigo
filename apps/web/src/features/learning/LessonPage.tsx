@@ -80,7 +80,7 @@ export function LessonPage() {
             <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
               {lesson.moduleTitle}
             </p>
-            <h1 className="mb-1 text-2xl font-bold">{lesson.title}</h1>
+            <h1 className="font-display mb-1 text-2xl font-bold">{lesson.title}</h1>
             <p className="mb-6 text-slate-600 dark:text-slate-400">{lesson.summary}</p>
 
             <Card>
