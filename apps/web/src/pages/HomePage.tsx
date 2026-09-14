@@ -1,23 +1,11 @@
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "@codeforge/ui";
-import { apiClient } from "../lib/api-client";
 import { useTheme } from "../app/theme-context";
 import { useAuth } from "../features/auth/auth-context";
-
-interface HealthResponse {
-  status: string;
-  database: "up" | "down";
-}
 
 export function HomePage() {
   const { theme, toggleTheme } = useTheme();
   const { status } = useAuth();
-  const health = useQuery({
-    queryKey: ["health"],
-    queryFn: async () => (await apiClient.get<HealthResponse>("/health")).data,
-    retry: 1,
-  });
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-gradient-to-b from-indigo-50 via-white to-white px-4 py-16 text-center dark:from-indigo-950/40 dark:via-slate-950 dark:to-slate-950">
@@ -63,23 +51,6 @@ export function HomePage() {
         >
           Modo {theme === "light" ? "oscuro" : "claro"}
         </button>
-      </div>
-
-      <div
-        className="mt-4 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm dark:border-slate-800 dark:bg-slate-900"
-        role="status"
-      >
-        {health.isLoading && "Comprobando estado de la API…"}
-        {health.isError && (
-          <span className="text-red-600 dark:text-red-400">
-            No hemos podido conectar con la API. Inténtalo de nuevo.
-          </span>
-        )}
-        {health.data && (
-          <span className="text-emerald-600 dark:text-emerald-400">
-            API: {health.data.status} · Base de datos: {health.data.database}
-          </span>
-        )}
       </div>
     </main>
   );
