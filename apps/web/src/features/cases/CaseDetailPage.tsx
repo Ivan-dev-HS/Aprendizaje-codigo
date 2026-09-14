@@ -77,7 +77,7 @@ export function CaseDetailPage() {
         >
           ← Casos reales
         </Link>
-        <h1 className="mb-1 mt-2 text-2xl font-bold">{c.title}</h1>
+        <h1 className="font-display mb-1 mt-2 text-2xl font-bold">{c.title}</h1>
         <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">
           {c.domain}
           {c.severity && ` · Severidad ${c.severity}`} · {c.points} XP

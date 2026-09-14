@@ -84,15 +84,16 @@ export function ProjectDetailPage() {
         >
           ← Proyectos
         </Link>
-        <h1 className="mb-1 mt-2 text-2xl font-bold">{project.title}</h1>
+        <h1 className="font-display mb-1 mt-2 text-2xl font-bold">{project.title}</h1>
         <p className="mb-6 text-slate-600 dark:text-slate-400">{project.brief}</p>
 
         {!hasStarted && (
           <Button
+            className="game-panel font-display !rounded-full [--game-shadow:theme(colors.brand.800)]"
             onClick={() => startMutation.mutate()}
             isLoading={startMutation.isPending}
           >
-            Empezar proyecto
+            🚀 Empezar proyecto
           </Button>
         )}
 

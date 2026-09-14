@@ -105,7 +105,7 @@ export function OnboardingPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-2xl flex-col justify-center gap-6 px-4 py-12">
+    <main className="mx-auto flex min-h-screen max-w-2xl flex-col justify-center gap-6 bg-gradient-to-b from-indigo-50 via-white to-white px-4 py-12 dark:from-indigo-950/40 dark:via-slate-950 dark:to-slate-950">
       <ol
         className="flex items-center justify-center gap-2"
         aria-label="Progreso del onboarding"
@@ -113,15 +113,17 @@ export function OnboardingPage() {
         {[1, 2, 3, 4].map((s) => (
           <li
             key={s}
-            className={`h-1.5 w-12 rounded-full ${s <= step ? "bg-brand-600" : "bg-slate-200 dark:bg-slate-800"}`}
+            className={`h-2 w-14 rounded-full transition-colors ${s <= step ? "bg-gradient-to-r from-indigo-400 to-violet-500" : "bg-slate-200 dark:bg-slate-800"}`}
             aria-current={s === step ? "step" : undefined}
           />
         ))}
       </ol>
 
       {step === 1 && (
-        <Card>
-          <h1 className="mb-1 text-xl font-bold">¿Qué experiencia tienes?</h1>
+        <Card className="game-panel rounded-3xl border-2 border-indigo-100 [--game-shadow:theme(colors.indigo.200)] dark:border-indigo-900 dark:[--game-shadow:theme(colors.indigo.900)]">
+          <h1 className="font-display mb-1 text-xl font-bold">
+            ¿Qué experiencia tienes?
+          </h1>
           <p className="mb-5 text-sm text-slate-600 dark:text-slate-400">
             Nos ayuda a no hacerte repetir lo que ya sabes.
           </p>
@@ -131,7 +133,7 @@ export function OnboardingPage() {
                 key={option.value}
                 type="button"
                 onClick={() => setExperienceLevel(option.value)}
-                className={`rounded-lg border p-4 text-left transition-colors ${
+                className={`rounded-2xl border-2 p-4 text-left transition-colors ${
                   experienceLevel === option.value
                     ? "border-brand-500 bg-brand-50 dark:bg-brand-950"
                     : "border-slate-200 hover:border-slate-300 dark:border-slate-800"
@@ -145,7 +147,7 @@ export function OnboardingPage() {
             ))}
           </div>
           <Button
-            className="mt-6 w-full"
+            className="game-panel font-display mt-6 w-full !rounded-full [--game-shadow:theme(colors.brand.800)]"
             disabled={!experienceLevel}
             onClick={() => setStep(2)}
           >
@@ -155,8 +157,8 @@ export function OnboardingPage() {
       )}
 
       {step === 2 && (
-        <Card>
-          <h1 className="mb-1 text-xl font-bold">¿Qué quieres conseguir?</h1>
+        <Card className="game-panel rounded-3xl border-2 border-indigo-100 [--game-shadow:theme(colors.indigo.200)] dark:border-indigo-900 dark:[--game-shadow:theme(colors.indigo.900)]">
+          <h1 className="font-display mb-1 text-xl font-bold">¿Qué quieres conseguir?</h1>
           <p className="mb-5 text-sm text-slate-600 dark:text-slate-400">
             Generaremos tu roadmap a partir de tu objetivo.
           </p>
@@ -166,7 +168,7 @@ export function OnboardingPage() {
                 key={option.value}
                 type="button"
                 onClick={() => setGoal(option.value)}
-                className={`rounded-lg border p-4 text-left transition-colors ${
+                className={`rounded-2xl border-2 p-4 text-left transition-colors ${
                   goal === option.value
                     ? "border-brand-500 bg-brand-50 dark:bg-brand-950"
                     : "border-slate-200 hover:border-slate-300 dark:border-slate-800"
@@ -180,10 +182,18 @@ export function OnboardingPage() {
             ))}
           </div>
           <div className="mt-6 flex gap-3">
-            <Button variant="secondary" onClick={() => setStep(1)}>
+            <Button
+              variant="secondary"
+              className="game-panel font-display !rounded-full [--game-shadow:theme(colors.slate.400)] dark:[--game-shadow:theme(colors.slate.700)]"
+              onClick={() => setStep(1)}
+            >
               Atrás
             </Button>
-            <Button className="flex-1" disabled={!goal} onClick={() => setStep(3)}>
+            <Button
+              className="game-panel font-display flex-1 !rounded-full [--game-shadow:theme(colors.brand.800)]"
+              disabled={!goal}
+              onClick={() => setStep(3)}
+            >
               Continuar
             </Button>
           </div>
@@ -191,8 +201,8 @@ export function OnboardingPage() {
       )}
 
       {step === 3 && (
-        <Card>
-          <h1 className="mb-1 text-xl font-bold">Evaluación inicial</h1>
+        <Card className="game-panel rounded-3xl border-2 border-indigo-100 [--game-shadow:theme(colors.indigo.200)] dark:border-indigo-900 dark:[--game-shadow:theme(colors.indigo.900)]">
+          <h1 className="font-display mb-1 text-xl font-bold">Evaluación inicial</h1>
           <p className="mb-5 text-sm text-slate-600 dark:text-slate-400">
             Unas preguntas rápidas para detectar qué ya dominas.
           </p>
@@ -244,11 +254,15 @@ export function OnboardingPage() {
           </div>
 
           <div className="mt-6 flex gap-3">
-            <Button variant="secondary" onClick={() => setStep(2)}>
+            <Button
+              variant="secondary"
+              className="game-panel font-display !rounded-full [--game-shadow:theme(colors.slate.400)] dark:[--game-shadow:theme(colors.slate.700)]"
+              onClick={() => setStep(2)}
+            >
               Atrás
             </Button>
             <Button
-              className="flex-1"
+              className="game-panel font-display flex-1 !rounded-full [--game-shadow:theme(colors.brand.800)]"
               disabled={!allAnswered}
               isLoading={completeMutation.isPending}
               onClick={handleFinishQuiz}
@@ -260,8 +274,10 @@ export function OnboardingPage() {
       )}
 
       {step === 4 && result && (
-        <Card>
-          <h1 className="mb-1 text-xl font-bold">Tu roadmap está listo</h1>
+        <Card className="game-panel rounded-3xl border-2 border-emerald-200 [--game-shadow:theme(colors.emerald.300)] dark:border-emerald-900 dark:[--game-shadow:theme(colors.emerald.800)]">
+          <h1 className="font-display mb-1 text-xl font-bold">
+            🎉 Tu roadmap está listo
+          </h1>
           <p className="mb-5 text-sm text-slate-600 dark:text-slate-400">
             Puntuación de la evaluación inicial: {result.assessment.score}/100
           </p>
@@ -291,7 +307,7 @@ export function OnboardingPage() {
           </ol>
 
           <Button
-            className="mt-6 w-full"
+            className="game-panel font-display mt-6 w-full !rounded-full [--game-shadow:theme(colors.brand.800)]"
             onClick={async () => {
               // Refresca el usuario con el estado real de backend (evita el
               // parche optimista temporal usado al llegar aquí).
