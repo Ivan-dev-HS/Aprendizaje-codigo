@@ -1,13 +1,17 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ExerciseAnswer } from "@codeforge/types";
 import { Alert, Button, Card } from "@codeforge/ui";
 import { NavBar } from "../../app/NavBar";
 import { exercisesApi } from "./exercises.api";
 
+/** Cuánto se muestra el feedback de acierto antes de saltar solo al siguiente. */
+const AUTO_ADVANCE_MS = 1800;
+
 export function ExerciseDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const startedAt = useRef(Date.now());
 
@@ -16,6 +20,16 @@ export function ExerciseDetailPage() {
     queryFn: () => exercisesApi.getDetail(id as string),
     enabled: !!id,
   });
+
+  // Lista completa (sin filtros) para saber qué ejercicio viene después del
+  // actual y poder saltar solo al acertar, sin volver a /exercises.
+  const sequenceQuery = useQuery({
+    queryKey: ["exercises-sequence"],
+    queryFn: () => exercisesApi.list({ pageSize: 100 }),
+  });
+  const sequenceIndex = sequenceQuery.data?.items.findIndex((e) => e.id === id) ?? -1;
+  const nextExercise =
+    sequenceIndex >= 0 ? sequenceQuery.data?.items[sequenceIndex + 1] : undefined;
 
   const [mcqOption, setMcqOption] = useState<string | null>(null);
   const [trueFalseValue, setTrueFalseValue] = useState<boolean | null>(null);
@@ -31,6 +45,19 @@ export function ExerciseDetailPage() {
       setOrderIds(exerciseQuery.data.prompt.items.map((i) => i.id));
     }
   }, [exerciseQuery.data]);
+
+  // Al saltar de un ejercicio a otro (mismo componente, solo cambia el :id
+  // de la ruta) hay que limpiar la respuesta/pistas del anterior — si no,
+  // se arrastran al siguiente ejercicio.
+  useEffect(() => {
+    setMcqOption(null);
+    setTrueFalseValue(null);
+    setPairs({});
+    setOutputText("");
+    setCompletionText("");
+    setHintsRevealed([]);
+    startedAt.current = Date.now();
+  }, [id]);
 
   const hintMutation = useMutation({
     mutationFn: () => exercisesApi.getHint(id as string, hintsRevealed.length + 1),
@@ -53,6 +80,21 @@ export function ExerciseDetailPage() {
 
   const exercise = exerciseQuery.data;
   const result = attemptMutation.data;
+
+  useEffect(() => {
+    attemptMutation.reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  // Al acertar, deja ver el feedback un momento y salta solo al siguiente
+  // ejercicio de la lista (o vuelve al listado si era el último).
+  useEffect(() => {
+    if (!result?.isCorrect) return;
+    const timer = setTimeout(() => {
+      navigate(nextExercise ? `/exercises/${nextExercise.id}` : "/exercises");
+    }, AUTO_ADVANCE_MS);
+    return () => clearTimeout(timer);
+  }, [result, nextExercise, navigate]);
 
   function moveItem(index: number, direction: -1 | 1) {
     setOrderIds((prev) => {
@@ -322,25 +364,46 @@ export function ExerciseDetailPage() {
               </Alert>
             )}
 
-            <div className="mt-6 flex items-center justify-between">
-              <Button
-                variant="secondary"
-                onClick={() => hintMutation.mutate()}
-                disabled={
-                  hintsRevealed.length >= exercise.hintsAvailable ||
-                  hintMutation.isPending
-                }
-              >
-                💡 Pedir pista ({hintsRevealed.length}/{exercise.hintsAvailable})
-              </Button>
-              <Button
-                isLoading={attemptMutation.isPending}
-                disabled={!answer}
-                onClick={() => answer && attemptMutation.mutate(answer)}
-              >
-                {result && !result.isCorrect ? "Reintentar" : "Enviar respuesta"}
-              </Button>
-            </div>
+            {result?.isCorrect ? (
+              <div className="mt-4 flex items-center justify-between gap-3 text-sm text-slate-600 dark:text-slate-400">
+                <span>
+                  {nextExercise
+                    ? "Pasando al siguiente ejercicio…"
+                    : "¡Has llegado al final de la lista!"}
+                </span>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() =>
+                    navigate(
+                      nextExercise ? `/exercises/${nextExercise.id}` : "/exercises",
+                    )
+                  }
+                >
+                  {nextExercise ? "Saltar ahora →" : "Volver a ejercicios"}
+                </Button>
+              </div>
+            ) : (
+              <div className="mt-6 flex items-center justify-between">
+                <Button
+                  variant="secondary"
+                  onClick={() => hintMutation.mutate()}
+                  disabled={
+                    hintsRevealed.length >= exercise.hintsAvailable ||
+                    hintMutation.isPending
+                  }
+                >
+                  💡 Pedir pista ({hintsRevealed.length}/{exercise.hintsAvailable})
+                </Button>
+                <Button
+                  isLoading={attemptMutation.isPending}
+                  disabled={!answer}
+                  onClick={() => answer && attemptMutation.mutate(answer)}
+                >
+                  {result ? "Reintentar" : "Enviar respuesta"}
+                </Button>
+              </div>
+            )}
           </>
         )}
       </main>
